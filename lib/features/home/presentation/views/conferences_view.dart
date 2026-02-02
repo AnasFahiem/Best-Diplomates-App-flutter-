@@ -95,11 +95,11 @@ class ConferencesView extends StatelessWidget {
             Expanded(
               child: Container(
                 decoration: const BoxDecoration(
-                  color: AppColors.navyBlue, // Placeholder for image
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-                ),
-                child: Center(
-                  child: Icon(Icons.event, color: Colors.white.withOpacity(0.5), size: 50),
+                  image: DecorationImage(
+                    image: NetworkImage("https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?q=80&w=1000&auto=format&fit=crop"), // Conference Hall
+                    fit: BoxFit.cover,
+                  ),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
                 ),
               ),
             ),

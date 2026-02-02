@@ -1,14 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
 import '../../../../core/constants/app_colors.dart';
 
-class EventDetailsScreen extends StatelessWidget {
+class EventDetailsScreen extends StatefulWidget {
   const EventDetailsScreen({super.key});
+
+  @override
+  State<EventDetailsScreen> createState() => _EventDetailsScreenState();
+}
+
+class _EventDetailsScreenState extends State<EventDetailsScreen> {
+  late VideoPlayerController _videoPlayerController;
+  ChewieController? _chewieController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Conference stock video
+    _videoPlayerController = VideoPlayerController.networkUrl(
+        Uri.parse('https://videos.pexels.com/video-files/855564/855564-hd_1920_1080_25fps.mp4'));
+    _videoPlayerController.initialize().then((_) {
+      setState(() {
+        _chewieController = ChewieController(
+          videoPlayerController: _videoPlayerController,
+          aspectRatio: _videoPlayerController.value.aspectRatio,
+          autoPlay: false,
+          looping: true,
+          placeholder: Container(
+            color: Colors.black,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.network(
+                  "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?q=80&w=1000&auto=format&fit=crop",
+                  fit: BoxFit.cover,
+                ),
+                Container(color: Colors.black.withOpacity(0.4)),
+                const Center(child: Icon(Icons.play_circle_fill, color: AppColors.white, size: 50)),
+              ],
+            ),
+          ),
+          errorBuilder: (context, errorMessage) {
+            return Center(
+              child: Text(
+                "Video Unavailable",
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+            );
+          },
+        );
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _videoPlayerController.dispose();
+    _chewieController?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.lightGrey,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -26,11 +84,23 @@ class EventDetailsScreen extends StatelessWidget {
                     color: AppColors.white, 
                     fontWeight: FontWeight.bold),
               ),
-              background: Container(
-                color: AppColors.navyBlue, // Placeholder
-                child: const Center(
-                  child: Icon(Icons.image, size: 100, color: Colors.white24),
-                ),
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(
+                    "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?q=80&w=1000&auto=format&fit=crop",
+                    fit: BoxFit.cover,
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -40,108 +110,192 @@ class EventDetailsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                   // Invitation Warning
+                   FadeInDown(
+                     child: Container(
+                       padding: const EdgeInsets.all(15),
+                       decoration: BoxDecoration(
+                         color: Colors.orange.withOpacity(0.1),
+                         border: Border.all(color: Colors.orange),
+                         borderRadius: BorderRadius.circular(10),
+                       ),
+                       child: Row(
+                         children: [
+                           const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 30),
+                           const SizedBox(width: 15),
+                           Expanded(
+                             child: Column(
+                               crossAxisAlignment: CrossAxisAlignment.start,
+                               children: [
+                                 Text(
+                                   "Invitation Required",
+                                   style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.orange[800]),
+                                 ),
+                                 Text(
+                                   "You must have an official invitation to attend this conference.",
+                                   style: GoogleFonts.poppins(fontSize: 12, color: Colors.orange[800]),
+                                 ),
+                               ],
+                             ),
+                           ),
+                         ],
+                       ),
+                     ),
+                   ),
+                   const SizedBox(height: 25),
+
+                  // Conference Details
                   FadeInUp(
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: AppColors.gold.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          child: Text(
-                            "Conference",
-                            style: GoogleFonts.poppins(color: AppColors.gold, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        const Spacer(),
-                        const Icon(Icons.calendar_today, size: 16, color: AppColors.grey),
-                         const SizedBox(width: 5),
-                        Text("25 Oct, 2024", style: GoogleFonts.poppins(color: AppColors.grey)),
+                        _buildDetailItem(Icons.calendar_today, "Date", "Oct 25 - 28, 2024"),
+                        _buildDetailItem(Icons.location_on, "Location", "New York, USA"),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  
+                  const SizedBox(height: 30),
+
+                  // Documentary / Trailer
                   FadeInUp(
                     delay: const Duration(milliseconds: 100),
-                    child: Text(
-                      "About the Event",
-                      style: GoogleFonts.poppins(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.navyBlue,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Conference Highlights(Documentary)",
+                          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.navyBlue),
+                        ),
+                        const SizedBox(height: 15),
+                        Container(
+                          height: 200,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.black,
+                            boxShadow: [
+                              BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 5))
+                            ],
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: _chewieController != null && _chewieController!.videoPlayerController.value.isInitialized
+                              ? Chewie(controller: _chewieController!)
+                              : const Center(child: CircularProgressIndicator(color: AppColors.gold)),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 10),
+
+                  const SizedBox(height: 30),
+
+                  // Payment & Acceptance Status
                   FadeInUp(
                     delay: const Duration(milliseconds: 200),
-                    child: Text(
-                      "Join us for the most prestigious diplomatic simulation of the year. This event brings together young leaders from over 50 countries to debate global issues, draft resolutions, and experience the life of a diplomat.\n\nKey Highlights:\n- Professional Networking\n- Guest Speakers\n- Award Ceremony",
-                      style: GoogleFonts.poppins(
-                        fontSize: 15,
-                        color: Colors.black87,
-                        height: 1.6,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Your Status",
+                          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.navyBlue),
+                        ),
+                        const SizedBox(height: 15),
+                        _buildStatusCard(
+                          title: "Payment Status",
+                          status: "Pending",
+                          icon: Icons.payment,
+                          color: Colors.orange,
+                          actionLabel: "Pay Now",
+                          onAction: () {},
+                        ),
+                         const SizedBox(height: 15),
+                        _buildStatusCard(
+                          title: "Letter of Acceptance",
+                          status: "Not Issued",
+                          icon: Icons.description,
+                          color: AppColors.grey,
+                          actionLabel: "Check Requirements",
+                          onAction: null,
+                        ),
+                      ],
                     ),
                   ),
-                   const SizedBox(height: 30),
-                   FadeInUp(
-                     delay: const Duration(milliseconds: 300),
-                     child: Text(
-                      "Gallery",
-                      style: GoogleFonts.poppins(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.navyBlue,
-                      ),
-                    ),
-                   ),
-                   const SizedBox(height: 10),
-                   SizedBox(
-                     height: 100,
-                     child: ListView.builder(
-                       scrollDirection: Axis.horizontal,
-                       itemCount: 4,
-                       itemBuilder: (context, index) {
-                         return Container(
-                           width: 100,
-                           margin: const EdgeInsets.only(right: 10),
-                           decoration: BoxDecoration(
-                             color: AppColors.grey.withOpacity(0.3),
-                             borderRadius: BorderRadius.circular(10),
-                           ),
-                           child: const Icon(Icons.image, color: Colors.white),
-                         );
-                       },
-                     ),
-                   ),
-                   const SizedBox(height: 100), // Spacing for bottom button
+                  
+                  const SizedBox(height: 100), // Spacing
                 ],
               ),
             ),
           ),
         ],
       ),
-      bottomSheet: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
+    );
+  }
+
+  Widget _buildDetailItem(IconData icon, String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)],
+          ),
+          child: Icon(icon, color: AppColors.gold, size: 24),
+        ),
+        const SizedBox(width: 15),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: GoogleFonts.poppins(color: AppColors.grey, fontSize: 12)),
+            Text(value, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: AppColors.navyBlue, fontSize: 14)),
           ],
         ),
-        child: ElevatedButton(
-          onPressed: () {
-            // Register logic
-          },
-          child: const Text("REGISTER NOW"),
-        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusCard({
+    required String title,
+    required String status,
+    required IconData icon,
+    required Color color,
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: GoogleFonts.poppins(color: AppColors.grey, fontSize: 12)),
+                Text(status, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: color, fontSize: 16)),
+              ],
+            ),
+          ),
+          if (actionLabel != null)
+            TextButton(
+              onPressed: onAction,
+              child: Text(actionLabel, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: AppColors.navyBlue)),
+            ),
+        ],
       ),
     );
   }
