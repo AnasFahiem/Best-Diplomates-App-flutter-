@@ -13,7 +13,7 @@ class PassportDetailsView extends StatelessWidget {
           "Passport Details",
           style: GoogleFonts.poppins(color: AppColors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: AppColors.navyBlue,
+        backgroundColor: AppColors.primaryBlue,
         iconTheme: const IconThemeData(color: AppColors.white),
       ),
       backgroundColor: AppColors.lightGrey,
@@ -27,7 +27,7 @@ class PassportDetailsView extends StatelessWidget {
             const SizedBox(height: 20),
             Text(
               "Passport Image",
-              style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: AppColors.navyBlue),
+              style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: AppColors.primaryBlue),
             ),
             const SizedBox(height: 10),
             Container(
@@ -57,7 +57,7 @@ class PassportDetailsView extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.navyBlue,
+                  backgroundColor: AppColors.primaryBlue,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 child: Text(

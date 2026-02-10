@@ -13,7 +13,7 @@ class CertificatesView extends StatelessWidget {
           "My Certificates",
           style: GoogleFonts.poppins(color: AppColors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: AppColors.navyBlue,
+        backgroundColor: AppColors.primaryBlue,
         iconTheme: const IconThemeData(color: AppColors.white),
       ),
       backgroundColor: AppColors.lightGrey,
@@ -28,7 +28,7 @@ class CertificatesView extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: AppColors.navyBlue,
+                color: AppColors.primaryBlue,
               ),
             ),
             const SizedBox(height: 10),

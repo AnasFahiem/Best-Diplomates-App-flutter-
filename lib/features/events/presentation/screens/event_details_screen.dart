@@ -4,9 +4,12 @@ import 'package:animate_do/animate_do.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../home/data/models/conference_model.dart';
 
 class EventDetailsScreen extends StatefulWidget {
-  const EventDetailsScreen({super.key});
+  final ConferenceModel conference;
+
+  const EventDetailsScreen({super.key, required this.conference});
 
   @override
   State<EventDetailsScreen> createState() => _EventDetailsScreenState();
@@ -35,7 +38,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               fit: StackFit.expand,
               children: [
                 Image.network(
-                  "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?q=80&w=1000&auto=format&fit=crop",
+                  widget.conference.imageUrl.isNotEmpty 
+                      ? widget.conference.imageUrl 
+                      : "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?q=80&w=1000&auto=format&fit=crop",
                   fit: BoxFit.cover,
                 ),
                 Container(color: Colors.black.withOpacity(0.4)),
@@ -73,12 +78,13 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
             expandedHeight: 250.0,
             floating: false,
             pinned: true,
-            backgroundColor: AppColors.navyBlue,
+            backgroundColor: AppColors.primaryBlue,
             iconTheme: const IconThemeData(color: AppColors.white),
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: true,
               title: Text(
-                "Diplomatic Summit 2024",
+                widget.conference.title,
+                textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
                     fontSize: 16,
                     color: AppColors.white, 
@@ -87,8 +93,10 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(
-                    "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?q=80&w=1000&auto=format&fit=crop",
+                   Image.network(
+                    widget.conference.imageUrl.isNotEmpty 
+                        ? widget.conference.imageUrl 
+                        : "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?q=80&w=1000&auto=format&fit=crop",
                     fit: BoxFit.cover,
                   ),
                   Container(
@@ -149,8 +157,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _buildDetailItem(Icons.calendar_today, "Date", "Oct 25 - 28, 2024"),
-                        _buildDetailItem(Icons.location_on, "Location", "New York, USA"),
+                        _buildDetailItem(Icons.calendar_today, "Date", 
+                            "${widget.conference.startDate.day}/${widget.conference.startDate.month} - ${widget.conference.endDate.day}/${widget.conference.endDate.month}, ${widget.conference.endDate.year}"),
+                        _buildDetailItem(Icons.location_on, "Location", widget.conference.location),
                       ],
                     ),
                   ),
@@ -165,7 +174,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       children: [
                         Text(
                           "Conference Highlights(Documentary)",
-                          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.navyBlue),
+                          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
                         ),
                         const SizedBox(height: 15),
                         Container(
@@ -196,7 +205,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       children: [
                         Text(
                           "Your Status",
-                          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.navyBlue),
+                          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
                         ),
                         const SizedBox(height: 15),
                         _buildStatusCard(
@@ -248,7 +257,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label, style: GoogleFonts.poppins(color: AppColors.grey, fontSize: 12)),
-            Text(value, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: AppColors.navyBlue, fontSize: 14)),
+            Text(value, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: AppColors.primaryBlue, fontSize: 14)),
           ],
         ),
       ],
@@ -293,7 +302,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
           if (actionLabel != null)
             TextButton(
               onPressed: onAction,
-              child: Text(actionLabel, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: AppColors.navyBlue)),
+              child: Text(actionLabel, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: AppColors.primaryBlue)),
             ),
         ],
       ),

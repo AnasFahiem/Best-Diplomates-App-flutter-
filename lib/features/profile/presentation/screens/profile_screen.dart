@@ -1,60 +1,131 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../viewmodels/profile_view_model.dart';
 import '../views/basic_info_view.dart';
 import '../views/certificates_view.dart';
 import '../views/passport_details_view.dart';
 import '../views/support_center_view.dart';
 import '../views/account_verification_view.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
+import '../../../auth/presentation/viewmodels/auth_view_model.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.lightGrey,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-             const SizedBox(height: 20),
-            // Profile Header
-            const CircleAvatar(
-              radius: 50,
-              backgroundColor: AppColors.white,
-              child: CircleAvatar(
-                  radius: 46,
-                  backgroundColor: AppColors.navyBlue,
-                  child: Text("AF", style: TextStyle(fontSize: 30, color: AppColors.gold))),
-            ),
-            const SizedBox(height: 15),
-            Text(
-              "Anas Fahiem",
-              style: GoogleFonts.poppins(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppColors.navyBlue,
-              ),
-            ),
-            Text(
-              "anas@example.com",
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: AppColors.grey,
-              ),
-            ),
-            const SizedBox(height: 30),
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
 
-            // Profile Options
-            _buildProfileCard(context),
-            
-            const SizedBox(height: 20),
-             _buildLogoutButton(context),
-          ],
-        ),
-      ),
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authVM = Provider.of<AuthViewModel>(context, listen: false);
+      final profileVM = Provider.of<ProfileViewModel>(context, listen: false);
+      
+      if (authVM.currentUser != null && profileVM.userProfile == null) {
+        profileVM.fetchProfile(authVM.currentUser!.id);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<AuthViewModel, ProfileViewModel>(
+      builder: (context, authViewModel, profileViewModel, child) {
+        final user = authViewModel.currentUser;
+        final profile = profileViewModel.userProfile;
+        
+        // Use profile data if available, otherwise auth metadata
+        String name = 'Guest User';
+        if (profile != null) {
+          name = profile.fullName;
+        } else if (user != null) {
+          final meta = user.userMetadata;
+          if (meta != null) {
+            if (meta.containsKey('first_name') || meta.containsKey('last_name')) {
+              name = "${meta['first_name'] ?? ''} ${meta['last_name'] ?? ''}".trim();
+            } else if (meta.containsKey('full_name')) {
+              name = meta['full_name'];
+            }
+          }
+        }
+        if (name.isEmpty) name = 'Guest User';
+                
+        final email = profile?.email ?? user?.email ?? 'guest@example.com';
+        
+        final avatarUrl = profile?.avatarUrl;
+
+        final initials = name.trim().isNotEmpty 
+            ? name.trim().split(' ').take(2).map((e) => e.isNotEmpty ? e[0] : '').join().toUpperCase()
+            : 'GU';
+
+        return Scaffold(
+          backgroundColor: AppColors.lightGrey,
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                 const SizedBox(height: 20),
+                // Profile Header
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.white,
+                    border: Border.all(color: AppColors.white, width: 2),
+                  ),
+                  child: ClipOval(
+                    child: avatarUrl != null
+                        ? Image.network(
+                            avatarUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Center(child: Icon(Icons.broken_image, color: Colors.blue));
+                            },
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return const Center(child: CircularProgressIndicator());
+                            },
+                          )
+                        : CircleAvatar(
+                            backgroundColor: AppColors.primaryBlue,
+                            child: Text(initials, style: const TextStyle(fontSize: 30, color: AppColors.white)),
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Text(
+                  name,
+                  style: GoogleFonts.poppins(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryBlue,
+                  ),
+                ),
+                Text(
+                  email,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: AppColors.grey,
+                  ),
+                ),
+                const SizedBox(height: 30),
+
+                // Profile Options
+                _buildProfileCard(context),
+                
+                const SizedBox(height: 20),
+                 _buildLogoutButton(context, authViewModel),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -85,10 +156,10 @@ class ProfileScreen extends StatelessWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.navyBlue.withOpacity(0.1),
+          color: AppColors.primaryBlue.withOpacity(0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: AppColors.navyBlue, size: 20),
+        child: Icon(icon, color: AppColors.primaryBlue, size: 20),
       ),
       title: Text(
         title,
@@ -142,7 +213,7 @@ class ProfileScreen extends StatelessWidget {
             onPressed: () {
               // Handle account deletion logic
               Navigator.pop(ctx);
-             
+              
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -155,15 +226,19 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
-   Widget _buildLogoutButton(BuildContext context) {
+
+   Widget _buildLogoutButton(BuildContext context, AuthViewModel authViewModel) {
     return SizedBox(
       width: double.infinity,
       child: TextButton(
-        onPressed: (){
-            Navigator.pushReplacement(
+        onPressed: () async {
+            await authViewModel.signOut();
+            if (context.mounted) {
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => const LoginScreen()),
               );
+            }
         }, 
         child: Text("Logout", style: GoogleFonts.poppins(color: AppColors.grey))
       ),

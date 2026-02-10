@@ -26,7 +26,7 @@ class _ModeratorApplicationFormViewState extends State<ModeratorApplicationFormV
           "Representative", // User requested title
           style: GoogleFonts.poppins(color: AppColors.white, fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        backgroundColor: AppColors.navyBlue,
+        backgroundColor: AppColors.primaryBlue,
         iconTheme: const IconThemeData(color: AppColors.white),
       ),
       backgroundColor: AppColors.lightGrey,
@@ -60,7 +60,7 @@ class _ModeratorApplicationFormViewState extends State<ModeratorApplicationFormV
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.navyBlue,
+                    backgroundColor: AppColors.primaryBlue,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   child: Text(
@@ -83,7 +83,7 @@ class _ModeratorApplicationFormViewState extends State<ModeratorApplicationFormV
       style: GoogleFonts.poppins(
         fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: AppColors.navyBlue,
+        color: AppColors.primaryBlue,
       ),
     );
   }
@@ -101,7 +101,7 @@ class _ModeratorApplicationFormViewState extends State<ModeratorApplicationFormV
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("I'm a", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: AppColors.navyBlue)),
+          Text("I'm a", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: AppColors.primaryBlue)),
           const SizedBox(height: 10),
           DropdownButtonFormField<String>(
             value: _selectedRole,
@@ -146,16 +146,16 @@ class _ModeratorApplicationFormViewState extends State<ModeratorApplicationFormV
           CheckboxListTile(
             value: _attendedBestDiplomats,
             onChanged: (val) => setState(() => _attendedBestDiplomats = val!),
-            title: Text("Have you previously attended a Best Diplomats Conference?", style: GoogleFonts.poppins(fontSize: 13, color: AppColors.navyBlue)),
-            activeColor: AppColors.navyBlue,
+            title: Text("Have you previously attended a Best Diplomats Conference?", style: GoogleFonts.poppins(fontSize: 13, color: AppColors.primaryBlue)),
+            activeColor: AppColors.primaryBlue,
             contentPadding: EdgeInsets.zero,
             controlAffinity: ListTileControlAffinity.leading,
           ),
           CheckboxListTile(
             value: _attendedRelatedConferences,
             onChanged: (val) => setState(() => _attendedRelatedConferences = val!),
-            title: Text("Have you attended any related conferences previously?", style: GoogleFonts.poppins(fontSize: 13, color: AppColors.navyBlue)),
-            activeColor: AppColors.navyBlue,
+            title: Text("Have you attended any related conferences previously?", style: GoogleFonts.poppins(fontSize: 13, color: AppColors.primaryBlue)),
+            activeColor: AppColors.primaryBlue,
             contentPadding: EdgeInsets.zero,
             controlAffinity: ListTileControlAffinity.leading,
           ),
@@ -163,7 +163,7 @@ class _ModeratorApplicationFormViewState extends State<ModeratorApplicationFormV
           const SizedBox(height: 20),
           Text(
             "What makes you an ideal candidate for the role of conference moderator?",
-            style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: AppColors.navyBlue, fontSize: 14),
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: AppColors.primaryBlue, fontSize: 14),
           ),
           const SizedBox(height: 5),
           Text(
@@ -212,7 +212,7 @@ class _ModeratorApplicationFormViewState extends State<ModeratorApplicationFormV
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.navyBlue),
+        borderSide: const BorderSide(color: AppColors.primaryBlue),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
     );

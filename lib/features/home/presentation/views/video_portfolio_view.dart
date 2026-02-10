@@ -21,7 +21,7 @@ class _VideoPortfolioViewState extends State<VideoPortfolioView> {
           "Video Portfolio",
           style: GoogleFonts.poppins(color: AppColors.white, fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        backgroundColor: AppColors.navyBlue,
+        backgroundColor: AppColors.primaryBlue,
         iconTheme: const IconThemeData(color: AppColors.white),
       ),
       backgroundColor: AppColors.lightGrey,
@@ -34,7 +34,7 @@ class _VideoPortfolioViewState extends State<VideoPortfolioView> {
             children: [
               Text(
                 "Add Video Link",
-                style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.navyBlue),
+                style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
               ),
               const SizedBox(height: 10),
               Text(
@@ -66,7 +66,7 @@ class _VideoPortfolioViewState extends State<VideoPortfolioView> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: AppColors.navyBlue),
+                    borderSide: const BorderSide(color: AppColors.primaryBlue),
                   ),
                 ),
               ),
@@ -84,7 +84,7 @@ class _VideoPortfolioViewState extends State<VideoPortfolioView> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.navyBlue,
+                    backgroundColor: AppColors.primaryBlue,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   child: Text(

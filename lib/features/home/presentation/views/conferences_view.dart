@@ -1,78 +1,113 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../events/presentation/screens/event_details_screen.dart';
+import '../viewmodels/home_view_model.dart';
+import '../../data/models/conference_model.dart';
 
 class ConferencesView extends StatelessWidget {
   const ConferencesView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Happening Soon Section
-            FadeInLeft(
-              child: Text(
-                "Happening Soon",
-                style: GoogleFonts.poppins(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.navyBlue,
-                ),
-              ),
-            ),
-            const SizedBox(height: 15),
-            SizedBox(
-              height: 240,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 3,
-                itemBuilder: (context, index) {
-                  return _buildHappeningSoonCard(context, index);
-                },
-              ),
-            ),
-            
-            const SizedBox(height: 30),
+    return Consumer<HomeViewModel>(
+      builder: (context, viewModel, child) {
+        if (viewModel.isConferencesLoading) {
+          return const Center(child: CircularProgressIndicator(color: AppColors.gold));
+        }
 
-            // Scheduled Conferences Section
-            FadeInLeft(
-              delay: const Duration(milliseconds: 200),
-              child: Text(
-                "Scheduled Conferences",
-                style: GoogleFonts.poppins(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.navyBlue,
-                ),
-              ),
+        if (viewModel.conferencesErrorMessage != null) {
+          return Center(child: Text(viewModel.conferencesErrorMessage!));
+        }
+
+        // Sort conferences by date to find the nearest one
+        final sortedConferences = List<ConferenceModel>.from(viewModel.conferences)
+          ..sort((a, b) => a.startDate.compareTo(b.startDate));
+
+        final happeningSoon = <ConferenceModel>[];
+        final scheduled = <ConferenceModel>[];
+
+        if (sortedConferences.isNotEmpty) {
+           // The first one is the nearest, so it goes to "Happening Soon"
+           happeningSoon.add(sortedConferences.first);
+           
+           // The rest go to "Scheduled"
+           if (sortedConferences.length > 1) {
+             scheduled.addAll(sortedConferences.sublist(1));
+           }
+        }
+
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Happening Soon Section
+                if (happeningSoon.isNotEmpty) ...[
+                  FadeInLeft(
+                    child: Text(
+                      "Happening Soon",
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryBlue,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  SizedBox(
+                    height: 240,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: happeningSoon.length,
+                      itemBuilder: (context, index) {
+                        return _buildHappeningSoonCard(context, happeningSoon[index]);
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                ],
+
+                // Scheduled Conferences Section
+                if (scheduled.isNotEmpty) ...[
+                  FadeInLeft(
+                    delay: const Duration(milliseconds: 200),
+                    child: Text(
+                      "Scheduled Conferences",
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryBlue,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: scheduled.length,
+                    itemBuilder: (context, index) {
+                      return _buildScheduledConferenceTile(context, scheduled[index], index);
+                    },
+                  ),
+                ],
+              ],
             ),
-            const SizedBox(height: 15),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return _buildScheduledConferenceTile(context, index);
-              },
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildHappeningSoonCard(BuildContext context, int index) {
+  Widget _buildHappeningSoonCard(BuildContext context, ConferenceModel conference) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const EventDetailsScreen()),
+          MaterialPageRoute(builder: (context) => EventDetailsScreen(conference: conference)),
         );
       },
       child: Container(
@@ -94,9 +129,11 @@ class ConferencesView extends StatelessWidget {
           children: [
             Expanded(
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: NetworkImage("https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?q=80&w=1000&auto=format&fit=crop"), // Conference Hall
+                    image: NetworkImage(conference.imageUrl.isNotEmpty 
+                        ? conference.imageUrl 
+                        : "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04"), // Fallback
                     fit: BoxFit.cover,
                   ),
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
@@ -109,11 +146,13 @@ class ConferencesView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Diplomatic Summit 2024",
+                    conference.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: AppColors.navyBlue,
+                      color: AppColors.primaryBlue,
                     ),
                   ),
                   const SizedBox(height: 5),
@@ -121,7 +160,10 @@ class ConferencesView extends StatelessWidget {
                     children: [
                       const Icon(Icons.calendar_today, size: 14, color: AppColors.gold),
                       const SizedBox(width: 5),
-                      Text("Oct 25, 2024", style: GoogleFonts.poppins(fontSize: 12, color: AppColors.grey)),
+                      Text(
+                        "${conference.startDate.day}/${conference.startDate.month}/${conference.startDate.year}", // formatting needed
+                        style: GoogleFonts.poppins(fontSize: 12, color: AppColors.grey),
+                      ),
                     ],
                   ),
                 ],
@@ -133,14 +175,14 @@ class ConferencesView extends StatelessWidget {
     );
   }
 
-  Widget _buildScheduledConferenceTile(BuildContext context, int index) {
+  Widget _buildScheduledConferenceTile(BuildContext context, ConferenceModel conference, int index) {
     return FadeInUp(
       delay: Duration(milliseconds: 300 + (index * 100)),
       child: GestureDetector(
         onTap: () {
            Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const EventDetailsScreen()),
+          MaterialPageRoute(builder: (context) => EventDetailsScreen(conference: conference)),
         );
         },
         child: Container(
@@ -162,17 +204,17 @@ class ConferencesView extends StatelessWidget {
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: AppColors.navyBlue.withOpacity(0.1),
+                color: AppColors.primaryBlue.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.date_range, color: AppColors.navyBlue),
+              child: const Icon(Icons.date_range, color: AppColors.primaryBlue),
             ),
             title: Text(
-              "Future Leaders Conference",
+              conference.title,
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.w600,
                 fontSize: 15,
-                color: AppColors.navyBlue,
+                color: AppColors.primaryBlue,
               ),
             ),
             subtitle: Column(
@@ -180,11 +222,11 @@ class ConferencesView extends StatelessWidget {
               children: [
                 const SizedBox(height: 5),
                 Text(
-                  "New York, USA",
+                  conference.location,
                   style: GoogleFonts.poppins(fontSize: 13, color: AppColors.grey),
                 ),
                 Text(
-                  "Nov 12 - 15, 2024",
+                  "${conference.startDate.day}/${conference.startDate.month} - ${conference.endDate.day}/${conference.endDate.month}, ${conference.endDate.year}",
                   style: GoogleFonts.poppins(fontSize: 12, color: AppColors.gold, fontWeight: FontWeight.w500),
                 ),
               ],

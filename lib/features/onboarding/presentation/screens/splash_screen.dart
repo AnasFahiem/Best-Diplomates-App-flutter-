@@ -39,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.navyBlue,
+      backgroundColor: AppColors.white,
       body: SizedBox(
         width: double.infinity,
         child: Column(
@@ -52,19 +52,19 @@ class _SplashScreenState extends State<SplashScreen> {
                 padding: const EdgeInsets.all(25),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.gold, width: 2),
+                  border: Border.all(color: AppColors.primaryBlue, width: 2),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.gold.withOpacity(0.2),
+                      color: AppColors.primaryBlue.withOpacity(0.2),
                       blurRadius: 20,
                       spreadRadius: 5,
                     )
                   ],
                 ),
-                child: const Icon(
-                  Icons.shield_outlined, // More diplomatic icon
-                  size: 60,
-                  color: AppColors.gold,
+                child: Image.asset(
+                  'assets/imagesUi/logo.png',
+                  height: 100,
+                  width: 100,
                 ),
               ),
             ),
@@ -74,10 +74,10 @@ class _SplashScreenState extends State<SplashScreen> {
               delay: const Duration(milliseconds: 500),
               child: Text(
                 'BEST DIPLOMATS',
-                style: GoogleFonts.cinzel( // Using Cinzel for a more "Diplomatic/Royal" look if available, else Poppins
+                style: GoogleFonts.cinzel(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.white,
+                  color: AppColors.primaryBlue,
                   letterSpacing: 4,
                 ),
               ),

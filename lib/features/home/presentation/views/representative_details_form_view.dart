@@ -24,7 +24,7 @@ class _RepresentativeDetailsFormViewState extends State<RepresentativeDetailsFor
           "Representative Details",
           style: GoogleFonts.poppins(color: AppColors.white, fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        backgroundColor: AppColors.navyBlue,
+        backgroundColor: AppColors.primaryBlue,
         iconTheme: const IconThemeData(color: AppColors.white),
       ),
       backgroundColor: AppColors.lightGrey,
@@ -64,7 +64,7 @@ class _RepresentativeDetailsFormViewState extends State<RepresentativeDetailsFor
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.navyBlue,
+                    backgroundColor: AppColors.primaryBlue,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   child: Text(
@@ -87,7 +87,7 @@ class _RepresentativeDetailsFormViewState extends State<RepresentativeDetailsFor
       style: GoogleFonts.poppins(
         fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: AppColors.navyBlue,
+        color: AppColors.primaryBlue,
       ),
     );
   }
@@ -105,7 +105,7 @@ class _RepresentativeDetailsFormViewState extends State<RepresentativeDetailsFor
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("I'm a", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: AppColors.navyBlue)),
+          Text("I'm a", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: AppColors.primaryBlue)),
           const SizedBox(height: 10),
           DropdownButtonFormField<String>(
             value: _selectedRole,
@@ -205,7 +205,7 @@ class _RepresentativeDetailsFormViewState extends State<RepresentativeDetailsFor
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.navyBlue),
+        borderSide: const BorderSide(color: AppColors.primaryBlue),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
     );

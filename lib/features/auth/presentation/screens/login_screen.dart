@@ -24,9 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
     // You'd typically use GetIt or Provider to access AuthViewModel, 
     // ensuring it's provided at the top level or here.
     // For now, I'll assume it's provided or I'll use ChangeNotifierProvider here locally for simplicity if not in main.
-    return ChangeNotifierProvider(
-        create: (_) => AuthViewModel(),
-        child: Consumer<AuthViewModel>(
+    return Consumer<AuthViewModel>(
             builder: (context, authViewModel, child) {
               return Scaffold(
                 backgroundColor: AppColors.white,
@@ -36,14 +34,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 80),
+                        const SizedBox(height: 60),
+                        Center(
+                          child: FadeInDown(
+                            child: Image.asset(
+                              'assets/imagesUi/logo.png',
+                              height: 120, 
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 30),
                         FadeInDown(
                           child: Text(
                             "Welcome Back",
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.inter(
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.navyBlue,
+                              color: AppColors.primaryBlue,
                             ),
                           ),
                         ),
@@ -51,9 +58,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           delay: const Duration(milliseconds: 200),
                           child: Text(
                             "Sign in to continue",
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.inter(
                               fontSize: 16,
-                              color: AppColors.grey,
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ),
@@ -108,8 +115,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                     onPressed: () {},
                                     child: Text(
                                       "Forgot Password?",
-                                      style: GoogleFonts.poppins(
-                                        color: AppColors.navyBlue,
+                                      style: GoogleFonts.inter(
+                                        color: AppColors.primaryBlue,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -135,12 +142,25 @@ class _LoginScreenState extends State<LoginScreen> {
                                                     context,
                                                     MaterialPageRoute(builder: (context) => const HomeScreen()),
                                                   );
+                                              } else if (context.mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(authViewModel.errorMessage ?? 'Login failed'),
+                                                    backgroundColor: Colors.red,
+                                                  ),
+                                                );
                                               }
                                             }
                                           },
                                     child: authViewModel.isLoading
-                                        ? const CircularProgressIndicator(color: AppColors.gold)
-                                        : const Text("LOGIN"),
+                                        ? const CircularProgressIndicator(color: AppColors.white)
+                                        : Text(
+                                            "LOGIN",
+                                            style: GoogleFonts.inter(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                          ),
                                   ),
                                 ),
                               ),
@@ -152,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   children: [
                                     Text(
                                       "Don't have an account? ",
-                                      style: GoogleFonts.poppins(color: AppColors.grey),
+                                      style: GoogleFonts.inter(color: AppColors.textSecondary),
                                     ),
                                     GestureDetector(
                                       onTap: () {
@@ -163,8 +183,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                       },
                                       child: Text(
                                         "Sign Up",
-                                        style: GoogleFonts.poppins(
-                                          color: AppColors.navyBlue,
+                                        style: GoogleFonts.inter(
+                                          color: AppColors.primaryBlue,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -181,7 +201,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               );
             }
-        )
-    );
+        );
   }
 }

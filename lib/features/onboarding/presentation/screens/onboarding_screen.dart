@@ -37,7 +37,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.navyBlue,
+      backgroundColor: AppColors.white,
       body: Stack(
         children: [
           // Background Elements
@@ -51,7 +51,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 height: 300,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.gold.withOpacity(0.05),
+                  color: AppColors.primaryBlue.withOpacity(0.03),
                 ),
               ),
             ),
@@ -91,7 +91,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       height: 8,
                       width: _currentPage == index ? 24 : 8,
                       decoration: BoxDecoration(
-                        color: _currentPage == index ? AppColors.gold : Colors.white24,
+                        color: _currentPage == index ? AppColors.primaryBlue : AppColors.lightGrey,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -119,8 +119,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.gold,
-                    foregroundColor: AppColors.navyBlue,
+                    backgroundColor: AppColors.primaryBlue,
+                    foregroundColor: AppColors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
@@ -175,10 +175,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               padding: const EdgeInsets.all(40),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.white.withOpacity(0.05),
-                border: Border.all(color: AppColors.gold.withOpacity(0.3)),
+                color: AppColors.primaryBlue.withOpacity(0.05),
+                border: Border.all(color: AppColors.primaryBlue.withOpacity(0.3)),
               ),
-              child: Icon(icon, size: 80, color: AppColors.gold),
+              child: Icon(icon, size: 80, color: AppColors.primaryBlue),
             ),
           ),
           const SizedBox(height: 60),
@@ -190,7 +190,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               style: GoogleFonts.poppins(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
-                color: AppColors.white,
+                color: AppColors.primaryBlue,
                 height: 1.2,
               ),
             ),
@@ -203,7 +203,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 fontSize: 15,
-                color: Colors.white70,
+                color: AppColors.textSecondary,
                 height: 1.6,
               ),
             ),

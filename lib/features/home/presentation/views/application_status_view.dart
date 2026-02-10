@@ -14,7 +14,7 @@ class ApplicationStatusView extends StatelessWidget {
           "Application Status",
           style: GoogleFonts.poppins(color: AppColors.white, fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        backgroundColor: AppColors.navyBlue,
+        backgroundColor: AppColors.primaryBlue,
         iconTheme: const IconThemeData(color: AppColors.white),
       ),
       backgroundColor: AppColors.lightGrey,
@@ -38,7 +38,7 @@ class ApplicationStatusView extends StatelessWidget {
                   children: [
                     Text(
                       "Application Timeline",
-                      style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.navyBlue),
+                      style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
                     ),
                     const SizedBox(height: 20),
                     _buildTimelineItem(title: "Application Submitted", date: "Jan 27, 2024", isCompleted: true, isLast: false),
@@ -73,7 +73,7 @@ class ApplicationStatusView extends StatelessWidget {
                         const SizedBox(width: 10),
                         Text(
                           "Team Comments",
-                          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.navyBlue),
+                          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
                         ),
                       ],
                     ),
@@ -90,7 +90,7 @@ class ApplicationStatusView extends StatelessWidget {
                         children: [
                           Text(
                             "Programme Acceptance Team",
-                            style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.navyBlue),
+                            style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primaryBlue),
                           ),
                           const SizedBox(height: 5),
                           Text(
@@ -144,7 +144,7 @@ class ApplicationStatusView extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
-                  color: isCompleted ? AppColors.navyBlue : AppColors.grey,
+                  color: isCompleted ? AppColors.primaryBlue : AppColors.grey,
                 ),
               ),
               Text(

@@ -4,8 +4,24 @@ import 'core/theme/app_theme.dart';
 import 'features/onboarding/presentation/screens/splash_screen.dart';
 
 import 'features/auth/presentation/viewmodels/auth_view_model.dart';
+import 'features/auth/data/repositories/auth_repository_impl.dart';
+import 'features/auth/data/datasources/auth_remote_data_source.dart';
 
-void main() {
+import 'features/home/presentation/viewmodels/home_view_model.dart';
+import 'features/home/data/repositories/home_repository_impl.dart';
+import 'features/home/data/datasources/home_remote_data_source.dart';
+import 'features/profile/presentation/viewmodels/profile_view_model.dart';
+import 'features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://ewdsxnsxajmfbpoierqj.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV3ZHN4bnN4YWptZmJwb2llcnFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMTU5MzgsImV4cCI6MjA4NTc5MTkzOH0.YpylbCyU2ySsVf_2mo4P96QXz6nGBW6MrxDb1aBTY7A',
+  );
+
   runApp(const MyApp());
 }
 
@@ -16,7 +32,25 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthViewModel()),
+        ChangeNotifierProvider(create: (_) => AuthViewModel(
+          authRepository: AuthRepositoryImpl(
+            remoteDataSource: AuthRemoteDataSourceImpl(
+              supabaseClient: Supabase.instance.client,
+            ),
+          ),
+        )),
+        ChangeNotifierProvider(create: (_) => HomeViewModel(
+          homeRepository: HomeRepositoryImpl(
+            remoteDataSource: HomeRemoteDataSourceImpl(
+              supabaseClient: Supabase.instance.client,
+            ),
+          ),
+        )..fetchConferences()..fetchOpportunities()),
+        ChangeNotifierProvider(create: (_) => ProfileViewModel(
+          profileRepository: ProfileRepositoryImpl(
+            Supabase.instance.client,
+          ),
+        )),
       ],
       child: MaterialApp(
         title: 'Best Diplomats',

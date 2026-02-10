@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../viewmodels/auth_view_model.dart';
 import '../../../home/presentation/screens/home_screen.dart';
+import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -15,22 +16,21 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthViewModel(),
-      child: Consumer<AuthViewModel>(
+    return Consumer<AuthViewModel>(
         builder: (context, authViewModel, child) {
           return Scaffold(
             backgroundColor: AppColors.white,
             appBar: AppBar(
               backgroundColor: AppColors.white,
               elevation: 0,
-              iconTheme: const IconThemeData(color: AppColors.navyBlue),
+              iconTheme: const IconThemeData(color: AppColors.primaryBlue),
             ),
             body: SingleChildScrollView(
               child: Padding(
@@ -38,13 +38,22 @@ class _SignupScreenState extends State<SignupScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Center(
+                      child: FadeInDown(
+                        child: Image.asset(
+                          'assets/imagesUi/logo.png',
+                          height: 80,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                     FadeInDown(
                       child: Text(
                         "Create Account",
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.navyBlue,
+                          color: AppColors.primaryBlue,
                         ),
                       ),
                     ),
@@ -52,9 +61,9 @@ class _SignupScreenState extends State<SignupScreen> {
                       delay: const Duration(milliseconds: 200),
                       child: Text(
                         "Join the global community",
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.inter(
                           fontSize: 16,
-                          color: AppColors.grey,
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ),
@@ -65,18 +74,40 @@ class _SignupScreenState extends State<SignupScreen> {
                         children: [
                            FadeInUp(
                             delay: const Duration(milliseconds: 300),
-                            child: TextFormField(
-                              controller: _nameController,
-                              decoration: const InputDecoration(
-                                labelText: "Full Name",
-                                prefixIcon: Icon(Icons.person_outline),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your name';
-                                }
-                                return null;
-                              },
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _firstNameController,
+                                    decoration: const InputDecoration(
+                                      labelText: "First Name",
+                                      prefixIcon: Icon(Icons.person_outline),
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Required';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 15),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _lastNameController,
+                                    decoration: const InputDecoration(
+                                      labelText: "Last Name",
+                                      prefixIcon: Icon(Icons.person_outline),
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Required';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -123,32 +154,76 @@ class _SignupScreenState extends State<SignupScreen> {
                           const SizedBox(height: 30),
                           FadeInUp(
                             delay: const Duration(milliseconds: 600),
-                            child: SizedBox(
-                              width: double.infinity,
-                              height: 55,
                               child: ElevatedButton(
-                                onPressed: authViewModel.isLoading
-                                    ? null
-                                    : () async {
-                                        if (_formKey.currentState!.validate()) {
-                                           bool success = await authViewModel.signup(
-                                              _nameController.text,
-                                              _emailController.text,
-                                              _passwordController.text);
-                                          if (success && context.mounted) {
-                                             Navigator.pushReplacement(
-                                                context,
-                                                MaterialPageRoute(builder: (context) => const HomeScreen()),
-                                              );
-                                          }
-                                        }
-                                      },
+                                onPressed: () async {
+                                  if (_formKey.currentState!.validate()) {
+                                    final success = await authViewModel.signup(
+                                      _firstNameController.text,
+                                      _lastNameController.text,
+                                      _emailController.text,
+                                      _passwordController.text,
+                                    );
+                                    if (success && context.mounted) {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text('Registration Successful'),
+                                          content: const Text(
+                                              'Please check your email for verification before logging in.'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context); // Close dialog
+                                                Navigator.pushReplacement(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          const LoginScreen()),
+                                                );
+                                              },
+                                              child: const Text('OK'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    } else if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                              authViewModel.errorMessage ??
+                                                  'Signup failed'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primaryBlue,
+                                  foregroundColor: AppColors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
                                 child: authViewModel.isLoading
-                                    ? const CircularProgressIndicator(color: AppColors.gold)
-                                    : const Text("SIGN UP"),
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          color: AppColors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Text(
+                                        "SIGN UP",
+                                        style: GoogleFonts.inter(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
                               ),
                             ),
-                          ),
                           const SizedBox(height: 20),
                            FadeInUp(
                                 delay: const Duration(milliseconds: 700),
@@ -157,7 +232,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                   children: [
                                     Text(
                                       "Already have an account? ",
-                                      style: GoogleFonts.poppins(color: AppColors.grey),
+                                      style: GoogleFonts.inter(color: AppColors.textSecondary),
                                     ),
                                     GestureDetector(
                                       onTap: () {
@@ -165,8 +240,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                       },
                                       child: Text(
                                         "Login",
-                                        style: GoogleFonts.poppins(
-                                          color: AppColors.navyBlue,
+                                        style: GoogleFonts.inter(
+                                          color: AppColors.primaryBlue,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -183,7 +258,6 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
           );
         },
-      ),
-    );
+      );
   }
 }

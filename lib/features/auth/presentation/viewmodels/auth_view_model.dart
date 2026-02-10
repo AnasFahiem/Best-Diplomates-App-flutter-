@@ -1,30 +1,69 @@
 import 'package:flutter/material.dart';
 
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../domain/repositories/auth_repository.dart';
+
 class AuthViewModel extends ChangeNotifier {
+  final AuthRepository _authRepository;
   bool _isLoading = false;
+  String? _errorMessage;
+
+  AuthViewModel({required AuthRepository authRepository}) : _authRepository = authRepository;
+
   bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
 
   Future<bool> login(String email, String password) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
-    
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 2));
 
-    _isLoading = false;
-    notifyListeners();
-    return true; // Always return true for mock
+    try {
+      await _authRepository.signIn(email: email, password: password);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } on AuthException catch (e) {
+      _errorMessage = e.message;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _errorMessage = 'An unexpected error occurred';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 
-  Future<bool> signup(String name, String email, String password) async {
+  Future<bool> signup(String firstName, String lastName, String email, String password) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 2));
-
-    _isLoading = false;
-    notifyListeners();
-    return true;
+    try {
+      await _authRepository.signUp(email: email, password: password, firstName: firstName, lastName: lastName);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } on AuthException catch (e) {
+      _errorMessage = e.message;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _errorMessage = 'An unexpected error occurred';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
+
+  Future<void> signOut() async {
+    await _authRepository.signOut();
+    notifyListeners();
+  }
+
+  User? get currentUser => _authRepository.currentUser;
 }
+

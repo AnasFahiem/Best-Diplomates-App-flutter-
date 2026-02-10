@@ -21,7 +21,7 @@ class _ModeratorResumeVideoViewState extends State<ModeratorResumeVideoView> {
           "Resume & Video Intro",
           style: GoogleFonts.poppins(color: AppColors.white, fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        backgroundColor: AppColors.navyBlue,
+        backgroundColor: AppColors.primaryBlue,
         iconTheme: const IconThemeData(color: AppColors.white),
       ),
       backgroundColor: AppColors.lightGrey,
@@ -34,7 +34,7 @@ class _ModeratorResumeVideoViewState extends State<ModeratorResumeVideoView> {
             children: [
               Text(
                 "Upload Resume / CV",
-                style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.navyBlue),
+                style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
               ),
               const SizedBox(height: 10),
               GestureDetector(
@@ -62,7 +62,7 @@ class _ModeratorResumeVideoViewState extends State<ModeratorResumeVideoView> {
                       Text(
                         _fileName ?? "Tap to Upload PDF/DOCX",
                         style: GoogleFonts.poppins(
-                          color: _fileName != null ? AppColors.navyBlue : AppColors.grey,
+                          color: _fileName != null ? AppColors.primaryBlue : AppColors.grey,
                           fontWeight: _fileName != null ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
@@ -75,7 +75,7 @@ class _ModeratorResumeVideoViewState extends State<ModeratorResumeVideoView> {
 
               Text(
                 "Video Introduction Link",
-                style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.navyBlue),
+                style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
               ),
               const SizedBox(height: 5),
               Text(
@@ -91,7 +91,7 @@ class _ModeratorResumeVideoViewState extends State<ModeratorResumeVideoView> {
                   fillColor: AppColors.white,
                   prefixIcon: const Icon(Icons.link, color: AppColors.grey),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.navyBlue)),
+                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.primaryBlue)),
                 ),
               ),
 
@@ -112,7 +112,7 @@ class _ModeratorResumeVideoViewState extends State<ModeratorResumeVideoView> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.navyBlue,
+                    backgroundColor: AppColors.primaryBlue,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   child: Text(

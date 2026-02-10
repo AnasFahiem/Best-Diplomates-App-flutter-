@@ -13,7 +13,7 @@ class SupportCenterView extends StatelessWidget {
           "Support Center",
           style: GoogleFonts.poppins(color: AppColors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: AppColors.navyBlue,
+        backgroundColor: AppColors.primaryBlue,
         iconTheme: const IconThemeData(color: AppColors.white),
       ),
       backgroundColor: AppColors.lightGrey,
@@ -28,7 +28,7 @@ class SupportCenterView extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: AppColors.navyBlue,
+                color: AppColors.primaryBlue,
               ),
             ),
             const SizedBox(height: 10),
@@ -46,7 +46,7 @@ class SupportCenterView extends StatelessWidget {
                 ),
                 child: Text(
                   "Contact Support",
-                  style: GoogleFonts.poppins(color: AppColors.navyBlue, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.poppins(color: AppColors.primaryBlue, fontWeight: FontWeight.bold),
                 ),
               ),
           ],

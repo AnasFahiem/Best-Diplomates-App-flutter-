@@ -1,102 +1,90 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import 'country_representative_details_view.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'moderator_details_view.dart';
+import '../viewmodels/home_view_model.dart';
+import '../../data/models/opportunity_model.dart';
 
 class OpportunitiesView extends StatelessWidget {
   const OpportunitiesView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // 1. Illustrated Header
-          _buildHeader(),
+    return Consumer<HomeViewModel>(
+      builder: (context, viewModel, child) {
+        if (viewModel.isOpportunitiesLoading) {
+          return const Center(child: CircularProgressIndicator(color: AppColors.gold));
+        }
 
-          const SizedBox(height: 20),
+        if (viewModel.opportunitiesErrorMessage != null) {
+          return Center(child: Text(viewModel.opportunitiesErrorMessage!));
+        }
 
-          // 2. Inspiring Quote
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              children: [
-                Text(
-                  "\"Leadership is not about a title or a designation. It's about impact, influence and inspiration.\"",
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontStyle: FontStyle.italic,
-                    color: AppColors.grey,
-                    height: 1.5,
-                  ),
+        final opportunities = viewModel.opportunities;
+
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 1. Illustrated Header
+              _buildHeader(),
+
+              const SizedBox(height: 20),
+
+              // 2. Inspiring Quote
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    Text(
+                      "\"Leadership is not about a title or a designation. It's about impact, influence and inspiration.\"",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontStyle: FontStyle.italic,
+                        color: AppColors.grey,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(width: 50, height: 3, color: AppColors.gold),
+                  ],
                 ),
-                const SizedBox(height: 10),
-                Container(width: 50, height: 3, color: AppColors.gold),
-              ],
-            ),
+              ),
+
+              const SizedBox(height: 30),
+
+              // 3. Opportunities List
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: opportunities.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final opportunity = entry.value;
+                    return Column(
+                      children: [
+                        FadeInUp(
+                          delay: Duration(milliseconds: 200 * (index + 1)),
+                          child: _buildOpportunityCard(
+                            context: context,
+                            opportunity: opportunity,
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 40),
+            ],
           ),
-
-          const SizedBox(height: 30),
-
-          // 3. Opportunities List
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              children: [
-                FadeInUp(
-                  delay: const Duration(milliseconds: 200),
-                  child: _buildOpportunityCard(
-                    title: "Country Representative Programme",
-                    description: "Step onto the global stage. Represent your nation, lead your delegation, and make your voice heard in international diplomatic simulations.",
-                    icon: Icons.public,
-                    color: Colors.blueAccent,
-                    onTap: () {
-                       Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const CountryRepresentativeDetailsView()),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 15),
-                FadeInUp(
-                  delay: const Duration(milliseconds: 400),
-                  child: _buildOpportunityCard(
-                    title: "Conferences Moderators",
-                    description: "Command the room. Facilitate high-level debates, ensure parliamentary procedure, and guide the flow of diplomatic discourse.",
-                    icon: Icons.mic_external_on,
-                    color: Colors.deepPurpleAccent,
-                    onTap: () {
-                       Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const ModeratorDetailsView()),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 15),
-                FadeInUp(
-                  delay: const Duration(milliseconds: 600),
-                  child: _buildOpportunityCard(
-                    title: "Volunteer Programme",
-                    description: "Be the backbone of change. Join our organizing team to create unforgettable experiences.",
-                    icon: Icons.volunteer_activism,
-                    color: Colors.teal,
-                    isComingSoon: true,
-                    onTap: () {},
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 40),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -104,7 +92,7 @@ class OpportunitiesView extends StatelessWidget {
     return Container(
       height: 280,
       decoration: const BoxDecoration(
-        color: AppColors.navyBlue,
+        color: AppColors.primaryBlue,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(40),
           bottomRight: Radius.circular(40),
@@ -187,15 +175,46 @@ class OpportunitiesView extends StatelessWidget {
   }
 
   Widget _buildOpportunityCard({
-    required String title,
-    required String description,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-    bool isComingSoon = false,
+    required BuildContext context,
+    required OpportunityModel opportunity,
   }) {
+    IconData iconData;
+    Color color;
+
+    switch (opportunity.icon) {
+      case 'public':
+        iconData = Icons.public;
+        color = Colors.blueAccent;
+        break;
+      case 'mic_external_on':
+        iconData = Icons.mic_external_on;
+        color = Colors.deepPurpleAccent;
+        break;
+      case 'volunteer_activism':
+        iconData = Icons.volunteer_activism;
+        color = Colors.teal;
+        break;
+      default:
+        iconData = Icons.star;
+        color = AppColors.gold;
+    }
+
     return GestureDetector(
-      onTap: isComingSoon ? null : onTap,
+      onTap: opportunity.isComingSoon 
+          ? null 
+          : () {
+              if (opportunity.type == 'country_rep') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CountryRepresentativeDetailsView()),
+                );
+              } else if (opportunity.type == 'moderator') {
+                 Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ModeratorDetailsView()),
+                );
+              }
+            },
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -208,7 +227,7 @@ class OpportunitiesView extends StatelessWidget {
               offset: const Offset(0, 5),
             ),
           ],
-          border: isComingSoon ? Border.all(color: AppColors.grey.withOpacity(0.3)) : null,
+          border: opportunity.isComingSoon ? Border.all(color: AppColors.grey.withOpacity(0.3)) : null,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,12 +235,12 @@ class OpportunitiesView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isComingSoon ? AppColors.grey.withOpacity(0.2) : color.withOpacity(0.1),
+                color: opportunity.isComingSoon ? AppColors.grey.withOpacity(0.2) : color.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(15),
               ),
               child: Icon(
-                icon,
-                color: isComingSoon ? AppColors.grey : color,
+                iconData,
+                color: opportunity.isComingSoon ? AppColors.grey : color,
                 size: 30,
               ),
             ),
@@ -230,47 +249,25 @@ class OpportunitiesView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          title,
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: isComingSoon ? AppColors.grey : AppColors.navyBlue,
-                          ),
-                        ),
-                      ),
-                      if (isComingSoon)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.grey.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            "Coming Soon",
-                            style: GoogleFonts.poppins(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.grey,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
                   Text(
-                    description,
+                    opportunity.title,
                     style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: AppColors.grey,
-                      height: 1.5,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: AppColors.primaryBlue,
                     ),
                   ),
-                  if (!isComingSoon) ...[
+                  const SizedBox(height: 5),
+                  Text(
+                    opportunity.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: AppColors.grey,
+                    ),
+                  ),
+                  if (!opportunity.isComingSoon) ...[
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -279,11 +276,11 @@ class OpportunitiesView extends StatelessWidget {
                           style: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.navyBlue,
+                            color: AppColors.primaryBlue,
                           ),
                         ),
                         const SizedBox(width: 5),
-                        const Icon(Icons.arrow_forward, size: 14, color: AppColors.navyBlue),
+                        const Icon(Icons.arrow_forward, size: 14, color: AppColors.primaryBlue),
                       ],
                     ),
                   ],

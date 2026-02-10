@@ -13,7 +13,7 @@ class AccountVerificationView extends StatelessWidget {
           "Account Verification",
           style: GoogleFonts.poppins(color: AppColors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: AppColors.navyBlue,
+        backgroundColor: AppColors.primaryBlue,
         iconTheme: const IconThemeData(color: AppColors.white),
       ),
       backgroundColor: AppColors.lightGrey,
@@ -69,12 +69,12 @@ class AccountVerificationView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: isCompleted ? Colors.green.withOpacity(0.1) : AppColors.navyBlue.withOpacity(0.1),
+                color: isCompleted ? Colors.green.withOpacity(0.1) : AppColors.primaryBlue.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
-                color: isCompleted ? Colors.green : AppColors.navyBlue,
+                color: isCompleted ? Colors.green : AppColors.primaryBlue,
                 size: 24,
               ),
             ),
@@ -88,7 +88,7 @@ class AccountVerificationView extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
-                      color: AppColors.navyBlue,
+                      color: AppColors.primaryBlue,
                     ),
                   ),
                   const SizedBox(height: 4),

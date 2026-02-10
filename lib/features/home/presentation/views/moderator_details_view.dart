@@ -38,7 +38,7 @@ class _ModeratorDetailsViewState extends State<ModeratorDetailsView> {
           "Conference Moderator",
           style: GoogleFonts.poppins(color: AppColors.white, fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        backgroundColor: AppColors.navyBlue,
+        backgroundColor: AppColors.primaryBlue,
         iconTheme: const IconThemeData(color: AppColors.white),
       ),
       backgroundColor: AppColors.lightGrey,
@@ -67,7 +67,7 @@ class _ModeratorDetailsViewState extends State<ModeratorDetailsView> {
                         const SizedBox(width: 10),
                         Text(
                           "About this Position",
-                          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.navyBlue),
+                          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
                         ),
                       ],
                     ),
@@ -88,11 +88,11 @@ class _ModeratorDetailsViewState extends State<ModeratorDetailsView> {
                         children: [
                           Text(
                             _isExpanded ? "Read Less" : "Read More",
-                            style: GoogleFonts.poppins(color: AppColors.navyBlue, fontWeight: FontWeight.w600),
+                            style: GoogleFonts.poppins(color: AppColors.primaryBlue, fontWeight: FontWeight.w600),
                           ),
                           Icon(
                             _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                            color: AppColors.navyBlue,
+                            color: AppColors.primaryBlue,
                           )
                         ],
                       ),
@@ -108,7 +108,7 @@ class _ModeratorDetailsViewState extends State<ModeratorDetailsView> {
               delay: const Duration(milliseconds: 200),
               child: Text(
                 "Steps to Apply",
-                style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navyBlue),
+                style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
               ),
             ),
             const SizedBox(height: 20),
@@ -219,7 +219,7 @@ class _ModeratorDetailsViewState extends State<ModeratorDetailsView> {
               decoration: BoxDecoration(
                 color: isLocked 
                   ? AppColors.grey.withOpacity(0.3) 
-                  : (isCompleted ? Colors.green.withOpacity(0.1) : AppColors.navyBlue.withOpacity(0.1)),
+                  : (isCompleted ? Colors.green.withOpacity(0.1) : AppColors.primaryBlue.withOpacity(0.1)),
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -227,7 +227,7 @@ class _ModeratorDetailsViewState extends State<ModeratorDetailsView> {
                   ? const Icon(Icons.lock, size: 20, color: AppColors.grey)
                   : (isCompleted 
                       ? const Icon(Icons.check, color: Colors.green)
-                      : Text(stepNumber, style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navyBlue))),
+                      : Text(stepNumber, style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primaryBlue))),
               ),
             ),
             const SizedBox(width: 15),
@@ -240,7 +240,7 @@ class _ModeratorDetailsViewState extends State<ModeratorDetailsView> {
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.bold, 
                       fontSize: 16, 
-                      color: isLocked ? AppColors.grey : AppColors.navyBlue
+                      color: isLocked ? AppColors.grey : AppColors.primaryBlue
                     )
                   ),
                   const SizedBox(height: 5),
