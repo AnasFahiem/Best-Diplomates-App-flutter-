@@ -18,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -93,10 +94,21 @@ class _LoginScreenState extends State<LoginScreen> {
                                 delay: const Duration(milliseconds: 400),
                                 child: TextFormField(
                                   controller: _passwordController,
-                                  obscureText: true,
-                                  decoration: const InputDecoration(
+                                  obscureText: !_isPasswordVisible,
+                                  decoration: InputDecoration(
                                     labelText: "Password",
-                                    prefixIcon: Icon(Icons.lock_outline),
+                                    prefixIcon: const Icon(Icons.lock_outline),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                                        color: AppColors.grey,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _isPasswordVisible = !_isPasswordVisible;
+                                        });
+                                      },
+                                    ),
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {

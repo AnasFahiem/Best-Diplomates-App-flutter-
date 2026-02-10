@@ -30,6 +30,11 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> deleteAccount() async {
+    await remoteDataSource.deleteAccount();
+  }
+
+  @override
   bool get isLoggedIn => remoteDataSource.currentSession != null;
 
   @override

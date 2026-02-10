@@ -156,7 +156,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.primaryBlue.withOpacity(0.1),
+          color: AppColors.primaryBlue.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: AppColors.primaryBlue, size: 20),
@@ -180,7 +180,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.error.withOpacity(0.1),
+          color: AppColors.error.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
@@ -210,15 +210,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Text("Cancel", style: GoogleFonts.poppins(color: AppColors.grey)),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               // Handle account deletion logic
-              Navigator.pop(ctx);
+              Navigator.pop(ctx); // Close dialog
               
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-              );
+              // Show loading? The ViewModel handles loading state but we are inside a dialog callback
+              // Ideally we show a loading indicator or use the ViewModel state in UI
               
+              final authVM = Provider.of<AuthViewModel>(context, listen: false);
+              final success = await authVM.deleteAccount();
+              
+              if (context.mounted) {
+                 if (success) {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      (route) => false,
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Account deleted successfully.'), backgroundColor: Colors.green),
+                    );
+                 } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(authVM.errorMessage ?? 'Failed to delete account'), backgroundColor: Colors.red),
+                    );
+                 }
+              }
             },
             child: Text("Delete", style: GoogleFonts.poppins(color: AppColors.error, fontWeight: FontWeight.bold)),
           ),

@@ -64,6 +64,27 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> deleteAccount() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _authRepository.deleteAccount();
+      // After successful deletion, sign out locally to clear session
+      await _authRepository.signOut();
+      
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Failed to delete account: ${e.toString()}';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   User? get currentUser => _authRepository.currentUser;
 }
 

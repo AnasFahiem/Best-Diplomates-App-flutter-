@@ -20,6 +20,21 @@ class _SignupScreenState extends State<SignupScreen> {
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  
+  bool _isPasswordVisible = false;
+  bool _hasMinLength = false;
+  bool _hasUppercase = false;
+  bool _hasDigits = false;
+  bool _hasSpecialChar = false;
+
+  void _updatePasswordStrength(String password) {
+    setState(() {
+      _hasMinLength = password.length >= 6;
+      _hasUppercase = password.contains(RegExp(r'[A-Z]'));
+      _hasDigits = password.contains(RegExp(r'[0-9]'));
+      _hasSpecialChar = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -133,95 +148,122 @@ class _SignupScreenState extends State<SignupScreen> {
                           const SizedBox(height: 20),
                           FadeInUp(
                             delay: const Duration(milliseconds: 500),
-                            child: TextFormField(
-                              controller: _passwordController,
-                              obscureText: true,
-                              decoration: const InputDecoration(
-                                labelText: "Password",
-                                prefixIcon: Icon(Icons.lock_outline),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your password';
-                                }
-                                if (value.length < 6) {
-                                  return 'Password must be at least 6 characters';
-                                }
-                                return null;
-                              },
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextFormField(
+                                  controller: _passwordController,
+                                  obscureText: !_isPasswordVisible,
+                                  onChanged: _updatePasswordStrength,
+                                  decoration: InputDecoration(
+                                    labelText: "Password",
+                                    prefixIcon: const Icon(Icons.lock_outline),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                                        color: AppColors.grey,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _isPasswordVisible = !_isPasswordVisible;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter your password';
+                                    }
+                                    if (!_hasMinLength || !_hasUppercase || !_hasDigits || !_hasSpecialChar) {
+                                      return 'Please meet all password requirements';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 10),
+                                _buildPasswordRule("At least 6 characters", _hasMinLength),
+                                _buildPasswordRule("At least one uppercase letter", _hasUppercase),
+                                _buildPasswordRule("At least one number", _hasDigits),
+                                _buildPasswordRule("At least one special character", _hasSpecialChar),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 30),
                           FadeInUp(
                             delay: const Duration(milliseconds: 600),
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  if (_formKey.currentState!.validate()) {
-                                    final success = await authViewModel.signup(
-                                      _firstNameController.text,
-                                      _lastNameController.text,
-                                      _emailController.text,
-                                      _passwordController.text,
-                                    );
-                                    if (success && context.mounted) {
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          title: const Text('Registration Successful'),
-                                          content: const Text(
-                                              'Please check your email for verification before logging in.'),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context); // Close dialog
-                                                Navigator.pushReplacement(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          const LoginScreen()),
-                                                );
-                                              },
-                                              child: const Text('OK'),
-                                            ),
-                                          ],
-                                        ),
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    if (_formKey.currentState!.validate()) {
+                                      final success = await authViewModel.signup(
+                                        _firstNameController.text,
+                                        _lastNameController.text,
+                                        _emailController.text,
+                                        _passwordController.text,
                                       );
-                                    } else if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                              authViewModel.errorMessage ??
-                                                  'Signup failed'),
-                                          backgroundColor: Colors.red,
-                                        ),
-                                      );
+                                      if (success && context.mounted) {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: const Text('Registration Successful'),
+                                            content: const Text(
+                                                'Please check your email for verification before logging in.'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context); // Close dialog
+                                                  Navigator.pushReplacement(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            const LoginScreen()),
+                                                  );
+                                                },
+                                                child: const Text('OK'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      } else if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                                authViewModel.errorMessage ??
+                                                    'Signup failed'),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
                                     }
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primaryBlue,
-                                  foregroundColor: AppColors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primaryBlue,
+                                    foregroundColor: AppColors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 18),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    elevation: 5,
                                   ),
+                                  child: authViewModel.isLoading
+                                      ? const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            color: AppColors.white,
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : Text(
+                                          "SIGN UP",
+                                          style: GoogleFonts.inter(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                            letterSpacing: 1.2,
+                                          ),
+                                        ),
                                 ),
-                                child: authViewModel.isLoading
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          color: AppColors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : Text(
-                                        "SIGN UP",
-                                        style: GoogleFonts.inter(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
                               ),
                             ),
                           const SizedBox(height: 20),
@@ -259,5 +301,28 @@ class _SignupScreenState extends State<SignupScreen> {
           );
         },
       );
+  }
+
+  Widget _buildPasswordRule(String text, bool isMet) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        children: [
+          Icon(
+            isMet ? Icons.check_circle : Icons.circle,
+            color: isMet ? Colors.green : Colors.grey,
+            size: 14,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: GoogleFonts.inter(
+              color: isMet ? Colors.green : Colors.grey,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

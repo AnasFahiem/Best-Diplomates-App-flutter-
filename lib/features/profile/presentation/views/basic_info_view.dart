@@ -2,9 +2,13 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:country_picker/country_picker.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:intl_phone_field/countries.dart' as intl_phone;
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/models/user_profile.dart';
 import '../viewmodels/profile_view_model.dart';
@@ -17,12 +21,23 @@ class BasicInfoView extends StatefulWidget {
   State<BasicInfoView> createState() => _BasicInfoViewState();
 }
 
-class CountryData {
-  final String name;
-  final String code;
-  final String flag;
-
-  CountryData({required this.name, required this.code, required this.flag});
+class LeadingZeroFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.startsWith('0')) {
+      return newValue.copyWith(
+        text: newValue.text.replaceFirst(RegExp(r'^0+'), ''),
+        selection: newValue.selection.copyWith(
+          baseOffset: newValue.selection.baseOffset > 0 ? newValue.selection.baseOffset - 1 : 0,
+          extentOffset: newValue.selection.extentOffset > 0 ? newValue.selection.extentOffset - 1 : 0,
+        ),
+      );
+    }
+    return newValue;
+  }
 }
 
 class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProviderStateMixin {
@@ -42,10 +57,13 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
   String? _selectedGender;
   String? _selectedMaritalStatus;
   
-  // ignore: unused_field
-  late CountryData _selectedCountry;
-  // ignore: unused_field
-  late CountryData _selectedEmergencyCountry;
+  // Store full phone numbers with country codes
+  String? _completePhoneNumber;
+  String? _completeEmergencyPhoneNumber;
+
+  // Initial Country Codes for Phone Fields
+  String _phoneIsoCode = 'US';
+  String _emergencyPhoneIsoCode = 'US';
   
   XFile? _imageFile;
   bool _isUploading = false;
@@ -54,29 +72,16 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
   bool _hasChanges = false;
   final ScrollController _scrollController = ScrollController();
   late AnimationController _shakeController;
+  // ignore: unused_field
   late Animation<double> _shakeAnimation;
 
   // Data Lists
   final List<String> _genders = ['Male', 'Female'];
   final List<String> _maritalStatuses = ['Single', 'Married', 'Divorced', 'Widowed'];
-  
-  final List<CountryData> _countries = [
-    CountryData(name: "USA", code: "+1", flag: "🇺🇸"),
-    CountryData(name: "Egypt", code: "+20", flag: "🇪🇬"),
-    CountryData(name: "UK", code: "+44", flag: "🇬🇧"),
-    CountryData(name: "India", code: "+91", flag: "🇮🇳"),
-    CountryData(name: "Pakistan", code: "+92", flag: "🇵🇰"),
-    CountryData(name: "UAE", code: "+971", flag: "🇦🇪"),
-    CountryData(name: "Canada", code: "+1", flag: "🇨🇦"),
-    CountryData(name: "Germany", code: "+49", flag: "🇩🇪"),
-    CountryData(name: "France", code: "+33", flag: "🇫🇷"),
-  ];
 
   @override
   void initState() {
     super.initState();
-    _selectedCountry = _countries[0]; // USA Default
-    _selectedEmergencyCountry = _countries[0]; // USA Default
     
     // Initialize Shake Animation
     _shakeController = AnimationController(
@@ -112,6 +117,7 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
     _lastNameController.addListener(markChanged);
     _addressController.addListener(markChanged);
     _nationalityController.addListener(markChanged);
+    // Phone controllers mostly handled by IntlPhoneField callbacks, but explicit listeners help too
     _phoneController.addListener(markChanged);
     _emergencyNameController.addListener(markChanged);
     _emergencyPhoneController.addListener(markChanged);
@@ -132,15 +138,60 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
     super.dispose();
   }
 
+  Map<String, String>? _parsePhoneNumber(String? phoneNumber) {
+    if (phoneNumber == null || phoneNumber.isEmpty) return null;
+    
+    // Create a local copy and sort by dial code length (descending) 
+    // to match longer codes first (e.g. +971 before +9)
+    // Use the aliased intl_phone.Country
+    final sortedCountries = List<intl_phone.Country>.from(intl_phone.countries)
+      ..sort((a, b) => b.dialCode.length.compareTo(a.dialCode.length));
+
+    for (var country in sortedCountries) {
+      final prefix = '+${country.dialCode}';
+      if (phoneNumber.startsWith(prefix)) {
+        return {
+          'code': country.code,
+          'number': phoneNumber.substring(prefix.length),
+        };
+      }
+    }
+    return null;
+  }
+
   void _populateControllers(UserProfile profile) {
     _firstNameController.text = profile.firstName ?? '';
     _lastNameController.text = profile.lastName ?? '';
     _emailController.text = profile.email ?? '';
     _addressController.text = profile.address ?? '';
     _nationalityController.text = profile.nationality ?? '';
-    _phoneController.text = profile.phone ?? '';
+    
+    // Parse Phone
+    if (profile.phone != null && profile.phone!.isNotEmpty) {
+      final parsed = _parsePhoneNumber(profile.phone);
+      if (parsed != null) {
+        _phoneIsoCode = parsed['code']!;
+        _phoneController.text = parsed['number']!;
+      } else {
+        _phoneController.text = profile.phone!;
+      }
+    }
+    
+    // Parse Emergency Phone
+    if (profile.emergencyContactNumber != null && profile.emergencyContactNumber!.isNotEmpty) {
+       final parsed = _parsePhoneNumber(profile.emergencyContactNumber);
+       if (parsed != null) {
+         _emergencyPhoneIsoCode = parsed['code']!;
+         _emergencyPhoneController.text = parsed['number']!;
+       } else {
+         _emergencyPhoneController.text = profile.emergencyContactNumber!;
+       }
+    }
+
     _emergencyNameController.text = profile.emergencyContactName ?? '';
-    _emergencyPhoneController.text = profile.emergencyContactNumber ?? '';
+    
+    _completePhoneNumber = profile.phone;
+    _completeEmergencyPhoneNumber = profile.emergencyContactNumber;
     
     if (profile.gender != null && _genders.contains(profile.gender)) {
         _selectedGender = profile.gender;
@@ -149,9 +200,10 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
     if (profile.maritalStatus != null && _maritalStatuses.contains(profile.maritalStatus)) {
         _selectedMaritalStatus = profile.maritalStatus;
     }
+    
+    // Refresh UI to show correct flags
+    if (mounted) setState(() {});
   }
-
-
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -266,9 +318,10 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
            gender: _selectedGender,
            maritalStatus: _selectedMaritalStatus,
            nationality: _nationalityController.text,
-           phone: _phoneController.text,
+           // Use the complete phone numbers captured from IntlPhoneField
+           phone: _completePhoneNumber ?? _phoneController.text, 
            emergencyContactName: _emergencyNameController.text,
-           emergencyContactNumber: _emergencyPhoneController.text,
+           emergencyContactNumber: _completeEmergencyPhoneNumber ?? _emergencyPhoneController.text,
            address: _addressController.text,
            avatarUrl: currentProfile?.avatarUrl, // PRESERVE AVATAR URL!
          );
@@ -299,7 +352,7 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
 
     return PopScope(
       canPop: canPop,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
 
         if (_isUploading) {
@@ -394,7 +447,8 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
                                        (backgroundImage as NetworkImage).url, 
                                        fit: BoxFit.cover,
                                        errorBuilder: (context, error, stackTrace) {
-                                         print('IMAGE LOAD ERROR: $error');
+                                         // print('IMAGE LOAD ERROR: $error'); 
+                                         // ignoring print usage for linter
                                          return const Center(child: Icon(Icons.broken_image, color: Colors.red));
                                        },
                                      ) 
@@ -458,16 +512,134 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
                     }),
                   ),
         
-                  _buildTextField("Nationality", _nationalityController),
+                  // Nationality - Country Picker
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 15),
+                    child: TextFormField(
+                      controller: _nationalityController,
+                      readOnly: true,
+                      onTap: () {
+                        showCountryPicker(
+                          context: context,
+                          onSelect: (Country country) {
+                            setState(() {
+                              _nationalityController.text = country.name;
+                              _hasChanges = true;
+                            });
+                          },
+                          showPhoneCode: false,
+                          countryListTheme: CountryListThemeData(
+                            bottomSheetHeight: 600,
+                            borderRadius: BorderRadius.circular(20),
+                            inputDecoration: InputDecoration(
+                              labelText: 'Search',
+                              hintText: 'Start typing to search',
+                              prefixIcon: const Icon(Icons.search),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      decoration: InputDecoration(
+                        labelText: "Nationality",
+                        labelStyle: const TextStyle(color: AppColors.grey),
+                        filled: true,
+                        fillColor: AppColors.white,
+                        suffixIcon: const Icon(Icons.arrow_drop_down, color: AppColors.primaryBlue),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: AppColors.gold),
+                        ),
+                      ),
+                      validator: (value) {
+                         if (value == null || value.isEmpty) {
+                             return 'Please select your nationality';
+                         }
+                         return null;
+                      },
+                    ),
+                  ),
                   
-                  // Phone Number with Rich Country Code
-                  // Simplified for now, just text field but retaining structure
-                  _buildTextField("Phone Number", _phoneController, keyboardType: TextInputType.phone),
+                  // Phone Number - IntlPhoneField
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 15),
+                    child: IntlPhoneField(
+                      decoration: InputDecoration(
+                        labelText: 'Phone Number',
+                        labelStyle: const TextStyle(color: AppColors.grey),
+                        filled: true,
+                        fillColor: AppColors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: AppColors.gold),
+                        ),
+                      ),
+                      initialCountryCode: _phoneIsoCode, 
+                      initialValue: _phoneController.text, // This sets existing number without code
+                      inputFormatters: [
+                        LeadingZeroFormatter(),
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      onChanged: (phone) {
+                        _completePhoneNumber = phone.completeNumber;
+                        _hasChanges = true;
+                        setState(() {});
+                      },
+                      onCountryChanged: (country) {
+                         // Country change triggers update
+                         _hasChanges = true;
+                         setState(() {});
+                      },
+                    ),
+                  ),
                   
                   _buildTextField("Emergency Contact Name", _emergencyNameController),
                   
-                  // Emergency Contact with Rich Country Code
-                   _buildTextField("Emergency Contact Number", _emergencyPhoneController, keyboardType: TextInputType.phone),
+                  // Emergency Phone - IntlPhoneField
+                  Padding(
+                     padding: const EdgeInsets.only(bottom: 15),
+                     child: IntlPhoneField(
+                       decoration: InputDecoration(
+                         labelText: 'Emergency Contact Number',
+                         labelStyle: const TextStyle(color: AppColors.grey),
+                         filled: true,
+                         fillColor: AppColors.white,
+                         border: OutlineInputBorder(
+                           borderRadius: BorderRadius.circular(10),
+                           borderSide: BorderSide.none,
+                         ),
+                         focusedBorder: OutlineInputBorder(
+                           borderRadius: BorderRadius.circular(10),
+                           borderSide: const BorderSide(color: AppColors.gold),
+                         ),
+                       ),
+                       initialCountryCode: _emergencyPhoneIsoCode, 
+                       initialValue: _emergencyPhoneController.text,
+                       inputFormatters: [
+                        LeadingZeroFormatter(),
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                       onChanged: (phone) {
+                         _completeEmergencyPhoneNumber = phone.completeNumber;
+                         _hasChanges = true;
+                         setState(() {});
+                       },
+                       onCountryChanged: (country) {
+                          _hasChanges = true;
+                          setState(() {});
+                       },
+                     ),
+                   ),
         
                   const SizedBox(height: 20),
                   
@@ -511,6 +683,7 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
     ),
     );
   }
+
 
   Widget _buildTextField(String label, TextEditingController controller, {bool readOnly = false, TextInputType keyboardType = TextInputType.text}) {
     return Padding(

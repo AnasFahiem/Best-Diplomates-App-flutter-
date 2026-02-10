@@ -11,6 +11,12 @@ class UserProfile {
   final String? emergencyContactNumber;
   final String? address;
   final String? avatarUrl;
+  final String? passportNumber;
+  final String? passportExpiryDate;
+  final String? passportImageUrl;
+  final bool? isPassportVerified;
+  final bool? isFaceVerified;
+  final String? verificationData;
 
   UserProfile({
     required this.id,
@@ -25,6 +31,12 @@ class UserProfile {
     this.emergencyContactNumber,
     this.address,
     this.avatarUrl,
+    this.passportNumber,
+    this.passportExpiryDate,
+    this.passportImageUrl,
+    this.isPassportVerified,
+    this.isFaceVerified,
+    this.verificationData,
   });
 
   UserProfile copyWith({
@@ -40,6 +52,12 @@ class UserProfile {
     String? emergencyContactNumber,
     String? address,
     String? avatarUrl,
+    String? passportNumber,
+    String? passportExpiryDate,
+    String? passportImageUrl,
+    bool? isPassportVerified,
+    bool? isFaceVerified,
+    String? verificationData,
   }) {
     return UserProfile(
       id: id ?? this.id,
@@ -54,6 +72,12 @@ class UserProfile {
       emergencyContactNumber: emergencyContactNumber ?? this.emergencyContactNumber,
       address: address ?? this.address,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      passportNumber: passportNumber ?? this.passportNumber,
+      passportExpiryDate: passportExpiryDate ?? this.passportExpiryDate,
+      passportImageUrl: passportImageUrl ?? this.passportImageUrl,
+      isPassportVerified: isPassportVerified ?? this.isPassportVerified,
+      isFaceVerified: isFaceVerified ?? this.isFaceVerified,
+      verificationData: verificationData ?? this.verificationData,
     );
   }
 
@@ -73,6 +97,12 @@ class UserProfile {
       emergencyContactNumber: json['emergency_contact_number'],
       address: json['address'],
       avatarUrl: json['avatar_url'],
+      passportNumber: json['passport_number'],
+      passportExpiryDate: json['passport_expiry_date'],
+      passportImageUrl: json['passport_image_url'],
+      isPassportVerified: json['is_passport_verified'],
+      isFaceVerified: json['is_face_verified'],
+      verificationData: json['verification_data'],
     );
   }
 
@@ -90,6 +120,12 @@ class UserProfile {
       'emergency_contact_number': emergencyContactNumber,
       'address': address,
       'avatar_url': avatarUrl,
+      'passport_number': passportNumber,
+      'passport_expiry_date': passportExpiryDate,
+      'passport_image_url': passportImageUrl,
+      'is_passport_verified': isPassportVerified,
+      'is_face_verified': isFaceVerified,
+      'verification_data': verificationData,
     };
   }
 }

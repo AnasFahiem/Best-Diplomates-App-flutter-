@@ -20,20 +20,22 @@ class _SplashScreenState extends State<SplashScreen> {
     _navigateToOnboarding();
   }
 
-  _navigateToOnboarding() async {
+  Future<void> _navigateToOnboarding() async {
     await Future.delayed(const Duration(seconds: 4));
     
-    if (mounted) {
-      final prefs = await SharedPreferences.getInstance();
-      bool seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
+    if (!mounted) return;
 
-      Widget nextScreen = seenOnboarding ? LoginScreen() : OnboardingScreen();
+    final prefs = await SharedPreferences.getInstance();
+    bool seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => nextScreen),
-      );
-    }
+    if (!mounted) return;
+
+    Widget nextScreen = seenOnboarding ? const LoginScreen() : const OnboardingScreen();
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => nextScreen),
+    );
   }
 
   @override
@@ -53,13 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(color: AppColors.primaryBlue, width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primaryBlue.withOpacity(0.2),
-                      blurRadius: 20,
-                      spreadRadius: 5,
-                    )
-                  ],
+                  // Glow removed
                 ),
                 child: Image.asset(
                   'assets/imagesUi/logo.png',
@@ -73,8 +69,8 @@ class _SplashScreenState extends State<SplashScreen> {
               duration: const Duration(milliseconds: 1000),
               delay: const Duration(milliseconds: 500),
               child: Text(
-                'BEST DIPLOMATS',
-                style: GoogleFonts.cinzel(
+                'FUTURE DIPLOMATS',
+                style: GoogleFonts.poppins( // Changed from Cinzel to Poppins
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primaryBlue,
