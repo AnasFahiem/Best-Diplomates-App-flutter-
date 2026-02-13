@@ -68,13 +68,17 @@ class _SplashScreenState extends State<SplashScreen> {
             FadeInUp(
               duration: const Duration(milliseconds: 1000),
               delay: const Duration(milliseconds: 500),
-              child: Text(
-                'FUTURE DIPLOMATS',
-                style: GoogleFonts.poppins( // Changed from Cinzel to Poppins
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryBlue,
-                  letterSpacing: 4,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  'FUTURE DIPLOMATS',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 28, // Reduced from 32
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryBlue,
+                    letterSpacing: 4,
+                  ),
                 ),
               ),
             ),

@@ -5,6 +5,7 @@ abstract class AuthRemoteDataSource {
   Future<AuthResponse> signUp({required String email, required String password, required Map<String, dynamic> data});
   Future<void> signOut();
   Future<void> deleteAccount();
+  Future<void> resetPasswordForEmail({required String email});
   Session? get currentSession;
   User? get currentUser;
 }
@@ -33,6 +34,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> deleteAccount() async {
     // Call the Postgres function 'delete_user' we created
     await supabaseClient.rpc('delete_user');
+  }
+
+  @override
+  Future<void> resetPasswordForEmail({required String email}) async {
+    await supabaseClient.auth.resetPasswordForEmail(email);
   }
 
   @override

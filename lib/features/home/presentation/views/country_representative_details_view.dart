@@ -2,6 +2,9 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/responsive_constants.dart';
+import '../../../../core/utils/responsive_utils.dart';
+import '../../../../core/widgets/responsive_layout.dart';
 import 'representative_details_form_view.dart';
 
 import 'video_portfolio_view.dart';
@@ -41,15 +44,16 @@ class _CountryRepresentativeDetailsViewState extends State<CountryRepresentative
         iconTheme: const IconThemeData(color: AppColors.white),
       ),
       backgroundColor: AppColors.lightGrey,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
+      body: ResponsiveContainer(
+        child: SingleChildScrollView(
+          padding: ResponsiveUtils.padding(context, mobile: 20, tablet: 32, desktop: 40),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. About this Position
             FadeInDown(
               child: Container(
-                padding: const EdgeInsets.all(20),
+                padding: ResponsiveUtils.padding(context, mobile: 20, tablet: 24, desktop: 28),
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(15),
@@ -164,6 +168,7 @@ class _CountryRepresentativeDetailsViewState extends State<CountryRepresentative
           ],
         ),
       ),
+      ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -203,7 +208,7 @@ class _CountryRepresentativeDetailsViewState extends State<CountryRepresentative
         );
       } : onTap,
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: ResponsiveUtils.padding(context, mobile: 20, tablet: 24, desktop: 28),
         decoration: BoxDecoration(
           color: isLocked ? AppColors.lightGrey : AppColors.white,
           borderRadius: BorderRadius.circular(15),

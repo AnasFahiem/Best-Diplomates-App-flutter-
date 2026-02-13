@@ -64,6 +64,29 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> sendPasswordResetEmail(String email) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _authRepository.resetPasswordForEmail(email: email);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } on AuthException catch (e) {
+      _errorMessage = e.message;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _errorMessage = 'Failed to send reset email';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<bool> deleteAccount() async {
     _isLoading = true;
     _errorMessage = null;

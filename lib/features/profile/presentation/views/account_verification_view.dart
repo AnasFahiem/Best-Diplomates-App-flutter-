@@ -8,6 +8,8 @@ import 'package:mrz_parser/mrz_parser.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/responsive_constants.dart';
+import '../../../../core/utils/responsive_utils.dart';
 import '../../domain/logic/liveness_detector.dart';
 import '../../domain/logic/passport_scanner.dart';
 import '../../domain/logic/verification_state.dart';
@@ -267,7 +269,7 @@ class _AccountVerificationViewState extends State<AccountVerificationView> {
         _state is! SuccessState && _state is! ProcessingState && _state is! ScanningState) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: ResponsiveUtils.padding(context, mobile: 20, tablet: 28, desktop: 36),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -557,7 +559,7 @@ class _AccountVerificationViewState extends State<AccountVerificationView> {
       onTap: isLocked ? null : onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: ResponsiveUtils.padding(context, mobile: 16, tablet: 20, desktop: 24),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),

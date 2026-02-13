@@ -17,31 +17,7 @@ class AppTheme {
         background: AppColors.scaffoldBackground,
         error: AppColors.error,
       ),
-      textTheme: GoogleFonts.interTextTheme().copyWith(
-        displayLarge: GoogleFonts.inter(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-          color: AppColors.textPrimary,
-        ),
-        displayMedium: GoogleFonts.inter(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: AppColors.textPrimary,
-        ),
-        titleLarge: GoogleFonts.inter(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
-        ),
-        bodyLarge: GoogleFonts.inter(
-          fontSize: 16,
-          color: AppColors.textPrimary,
-        ),
-        bodyMedium: GoogleFonts.inter(
-          fontSize: 14,
-          color: AppColors.textSecondary,
-        ),
-      ),
+      textTheme: _buildResponsiveTextTheme(),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.white,
@@ -101,6 +77,35 @@ class AppTheme {
         unselectedItemColor: AppColors.textSecondary,
         type: BottomNavigationBarType.fixed,
         elevation: 8,
+      ),
+    );
+  }
+
+  /// Build responsive text theme
+  static TextTheme _buildResponsiveTextTheme() {
+    return GoogleFonts.interTextTheme().copyWith(
+      displayLarge: GoogleFonts.inter(
+        fontSize: 32,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textPrimary,
+      ),
+      displayMedium: GoogleFonts.inter(
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textPrimary,
+      ),
+      titleLarge: GoogleFonts.inter(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+      ),
+      bodyLarge: GoogleFonts.inter(
+        fontSize: 16,
+        color: AppColors.textPrimary,
+      ),
+      bodyMedium: GoogleFonts.inter(
+        fontSize: 14,
+        color: AppColors.textSecondary,
       ),
     );
   }

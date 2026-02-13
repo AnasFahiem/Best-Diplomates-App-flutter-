@@ -35,6 +35,11 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> resetPasswordForEmail({required String email}) async {
+    await remoteDataSource.resetPasswordForEmail(email: email);
+  }
+
+  @override
   bool get isLoggedIn => remoteDataSource.currentSession != null;
 
   @override

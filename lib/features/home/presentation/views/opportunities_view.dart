@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/responsive_constants.dart';
+import '../../../../core/utils/responsive_utils.dart';
+import '../../../../core/widgets/responsive_layout.dart';
 import 'country_representative_details_view.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'moderator_details_view.dart';
@@ -37,7 +40,7 @@ class OpportunitiesView extends StatelessWidget {
 
               // 2. Inspiring Quote
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: ResponsiveUtils.horizontalPadding(context, mobile: 20, tablet: 32, desktop: 40),
                 child: Column(
                   children: [
                     Text(
@@ -60,7 +63,7 @@ class OpportunitiesView extends StatelessWidget {
 
               // 3. Opportunities List
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: ResponsiveUtils.horizontalPadding(context, mobile: 16, tablet: 24, desktop: 32),
                 child: Column(
                   children: opportunities.asMap().entries.map((entry) {
                     final index = entry.key;
@@ -216,7 +219,7 @@ class OpportunitiesView extends StatelessWidget {
               }
             },
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: ResponsiveUtils.padding(context, mobile: 20, tablet: 24, desktop: 28),
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(20),

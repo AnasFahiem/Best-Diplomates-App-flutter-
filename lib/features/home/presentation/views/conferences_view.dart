@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/responsive_constants.dart';
+import '../../../../core/utils/responsive_utils.dart';
+import '../../../../core/widgets/responsive_layout.dart';
 import '../../../events/presentation/screens/event_details_screen.dart';
 import '../viewmodels/home_view_model.dart';
 import '../../data/models/conference_model.dart';
@@ -39,10 +42,13 @@ class ConferencesView extends StatelessWidget {
            }
         }
 
-        return SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
+        return ResponsiveContainer(
+          child: SingleChildScrollView(
+            child: ResponsivePadding(
+              mobile: 16,
+              tablet: 24,
+              desktop: 32,
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Happening Soon Section
@@ -97,6 +103,7 @@ class ConferencesView extends StatelessWidget {
               ],
             ),
           ),
+          ),
         );
       },
     );
@@ -111,8 +118,11 @@ class ConferencesView extends StatelessWidget {
         );
       },
       child: Container(
-        width: 300,
-        margin: const EdgeInsets.only(right: 15, bottom: 10),
+        width: context.responsiveValue(mobile: 300, tablet: 350, desktop: 400),
+        margin: EdgeInsets.only(
+          right: ResponsiveUtils.spacing(context, mobile: 15, tablet: 20, desktop: 24),
+          bottom: 10,
+        ),
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(15),
@@ -141,7 +151,7 @@ class ConferencesView extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: ResponsiveUtils.padding(context, mobile: 12, tablet: 14, desktop: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -199,7 +209,7 @@ class ConferencesView extends StatelessWidget {
             ],
           ),
           child: ListTile(
-            contentPadding: const EdgeInsets.all(12),
+            contentPadding: ResponsiveUtils.padding(context, mobile: 12, tablet: 16, desktop: 20),
             leading: Container(
               width: 60,
               height: 60,
