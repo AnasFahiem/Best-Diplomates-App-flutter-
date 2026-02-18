@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 import '../../../auth/presentation/viewmodels/auth_view_model.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../profile/presentation/viewmodels/profile_view_model.dart';
+import '../../../profile/presentation/views/support_center_view.dart';
+import '../../../profile/presentation/views/settings_view.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,10 +26,10 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
-      final user = authViewModel.currentUser;
-      if (user != null) {
+      final userProfile = authViewModel.currentUserProfile;
+      if (userProfile != null) {
         // Fetch profile immediately to ensure we have the latest first/last name
-        Provider.of<ProfileViewModel>(context, listen: false).fetchProfile(user.id);
+        Provider.of<ProfileViewModel>(context, listen: false).fetchProfile(userProfile['id']);
       }
     });
   }
@@ -58,33 +60,30 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsView()));
+            },
           ),
           const SizedBox(width: 10),
         ],
       ),
       drawer: Consumer2<AuthViewModel, ProfileViewModel>(
         builder: (context, authViewModel, profileViewModel, child) {
-          final user = authViewModel.currentUser;
+          final userProfile = authViewModel.currentUserProfile;
           final profile = profileViewModel.userProfile;
           
-          // Use profile data if available, otherwise auth metadata
+          // Use profile data if available, otherwise logged-in profile map
           String name = 'Guest User';
           if (profile != null) {
             name = profile.fullName;
-          } else if (user != null) {
-            final meta = user.userMetadata;
-            if (meta != null) {
-              if (meta.containsKey('first_name') || meta.containsKey('last_name')) {
-                name = "${meta['first_name'] ?? ''} ${meta['last_name'] ?? ''}".trim();
-              } else if (meta.containsKey('full_name')) {
-                name = meta['full_name'];
-              }
-            }
+          } else if (userProfile != null) {
+            final firstName = userProfile['first_name'] ?? '';
+            final lastName = userProfile['last_name'] ?? '';
+            name = '$firstName $lastName'.trim();
           }
           if (name.isEmpty) name = 'Guest User';
                   
-          final email = profile?.email ?? user?.email ?? 'guest@example.com';
+          final email = profile?.email ?? userProfile?['email'] ?? 'guest@example.com';
           
           final avatarUrl = profile?.avatarUrl;
 
@@ -100,35 +99,49 @@ class _HomeScreenState extends State<HomeScreen> {
                   decoration: const BoxDecoration(color: AppColors.primaryBlue),
                   accountName: Text(name),
                   accountEmail: Text(email),
-                  currentAccountPicture: Container(
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.white,
-                    ),
-                    child: ClipOval(
-                      child: avatarUrl != null
-                          ? Image.network(
-                              avatarUrl,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return const Center(child: Icon(Icons.broken_image, color: Colors.blue));
-                              },
-                            )
-                          : Center(
-                              child: Text(initials, style: const TextStyle(color: AppColors.primaryBlue, fontSize: 24)),
-                            ),
+                  currentAccountPicture: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      setState(() {
+                        _currentIndex = 2;
+                      });
+                    },
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.white,
+                      ),
+                      child: ClipOval(
+                        child: avatarUrl != null
+                            ? Image.network(
+                                avatarUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Center(child: Icon(Icons.broken_image, color: Colors.blue));
+                                },
+                              )
+                            : Center(
+                                child: Text(initials, style: const TextStyle(color: AppColors.primaryBlue, fontSize: 24)),
+                              ),
+                      ),
                     ),
                   ),
                 ),
                 ListTile(
                   leading: const Icon(Icons.settings),
                   title: const Text("Settings"),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsView()));
+                  },
                 ),
                 ListTile(
                   leading: const Icon(Icons.help_outline),
                   title: const Text("Help & Support"),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const SupportCenterView()));
+                  },
                 ),
                 ListTile(
                   leading: const Icon(Icons.info_outline),

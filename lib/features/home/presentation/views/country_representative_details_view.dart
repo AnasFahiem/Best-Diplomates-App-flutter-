@@ -1,12 +1,14 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/responsive_constants.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/widgets/responsive_layout.dart';
+import '../../../auth/presentation/viewmodels/auth_view_model.dart';
+import '../viewmodels/application_view_model.dart';
 import 'representative_details_form_view.dart';
-
 import 'video_portfolio_view.dart';
 
 class CountryRepresentativeDetailsView extends StatefulWidget {
@@ -18,19 +20,30 @@ class CountryRepresentativeDetailsView extends StatefulWidget {
 
 class _CountryRepresentativeDetailsViewState extends State<CountryRepresentativeDetailsView> {
   bool _isExpanded = false;
-  bool _isStep1Completed = false;
-  bool _isStep2Completed = false;
 
   final String _fullDescription = 
-      "As a Country Representative, you will be the face of Best Diplomats in your nation. "
+      "As a Country Representative, you will be the face of Future Diplomats in your nation. "
       "You will lead delegations, organize local chapters, and facilitate diplomatic simulations that empower young leaders. "
       "This role requires strong communication skills, a passion for international relations, and a commitment to our mission of crafting future leaders.\n\n"
       "Responsibilities include:\n"
       "• Recruiting and mentoring delegates for international conferences.\n"
-      "• Promoting Best Diplomats events and initiatives on social media and local networks.\n"
+      "• Promoting Future Diplomats events and initiatives on social media and local networks.\n"
       "• Acting as a liaison between the headquarters and your local community.\n"
       "• Organizing pre-departure sessions and training for your delegation.\n"
       "• Representing your country with pride and professionalism at our global summits.";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadApplication();
+  }
+
+  void _loadApplication() {
+    final userId = context.read<AuthViewModel>().currentUserProfile?['id']?.toString();
+    if (userId != null) {
+      context.read<ApplicationViewModel>().loadRepresentativeApplication(userId);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,130 +57,133 @@ class _CountryRepresentativeDetailsViewState extends State<CountryRepresentative
         iconTheme: const IconThemeData(color: AppColors.white),
       ),
       backgroundColor: AppColors.lightGrey,
-      body: ResponsiveContainer(
-        child: SingleChildScrollView(
-          padding: ResponsiveUtils.padding(context, mobile: 20, tablet: 32, desktop: 40),
-          child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1. About this Position
-            FadeInDown(
-              child: Container(
-                padding: ResponsiveUtils.padding(context, mobile: 20, tablet: 24, desktop: 28),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.info_outline, color: AppColors.gold),
-                        const SizedBox(width: 10),
-                        Text(
-                          "About this Position",
-                          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 300),
-                      child: Text(
-                        _isExpanded ? _fullDescription : "${_fullDescription.substring(0, 150)}...",
-                        style: GoogleFonts.poppins(color: AppColors.grey, height: 1.5),
-                        textAlign: TextAlign.justify,
+      body: Consumer<ApplicationViewModel>(
+        builder: (context, appVm, _) {
+          final isStep1Completed = appVm.isRepStep1Completed;
+          final isStep2Completed = appVm.isRepStep2Completed;
+
+          return ResponsiveContainer(
+            child: SingleChildScrollView(
+              padding: ResponsiveUtils.padding(context, mobile: 20, tablet: 32, desktop: 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. About this Position
+                  FadeInDown(
+                    child: Container(
+                      padding: ResponsiveUtils.padding(context, mobile: 20, tablet: 24, desktop: 28),
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    InkWell(
-                      onTap: () => setState(() => _isExpanded = !_isExpanded),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            _isExpanded ? "Read Less" : "Read More",
-                            style: GoogleFonts.poppins(color: AppColors.primaryBlue, fontWeight: FontWeight.w600),
+                          Row(
+                            children: [
+                              const Icon(Icons.info_outline, color: AppColors.gold),
+                              const SizedBox(width: 10),
+                              Text(
+                                "About this Position",
+                                style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
+                              ),
+                            ],
                           ),
-                          Icon(
-                            _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                            color: AppColors.primaryBlue,
-                          )
+                          const SizedBox(height: 15),
+                          AnimatedSize(
+                            duration: const Duration(milliseconds: 300),
+                            child: Text(
+                              _isExpanded ? _fullDescription : "${_fullDescription.substring(0, 150)}...",
+                              style: GoogleFonts.poppins(color: AppColors.grey, height: 1.5),
+                              textAlign: TextAlign.justify,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          InkWell(
+                            onTap: () => setState(() => _isExpanded = !_isExpanded),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text(
+                                  _isExpanded ? "Read Less" : "Read More",
+                                  style: GoogleFonts.poppins(color: AppColors.primaryBlue, fontWeight: FontWeight.w600),
+                                ),
+                                Icon(
+                                  _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                                  color: AppColors.primaryBlue,
+                                )
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            
-            const SizedBox(height: 30),
-            
-            FadeInLeft(
-              delay: const Duration(milliseconds: 200),
-              child: Text(
-                "Steps to Apply",
-                style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
-              ),
-            ),
-            const SizedBox(height: 20),
+                  ),
+                  
+                  const SizedBox(height: 30),
+                  
+                  FadeInLeft(
+                    delay: const Duration(milliseconds: 200),
+                    child: Text(
+                      "Steps to Apply",
+                      style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
 
-            // Step 1
-            FadeInUp(
-              delay: const Duration(milliseconds: 300),
-              child: _buildStepCard(
-                stepNumber: "1",
-                title: "Add / Edit Details",
-                description: "Provide details about your social media, education, and work experience.",
-                icon: Icons.edit_note,
-                isCompleted: _isStep1Completed, 
-                onTap: () async {
-                   final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const RepresentativeDetailsFormView()),
-                  );
-                  if (result == true) {
-                    setState(() {
-                      _isStep1Completed = true;
-                    });
-                  }
-                },
-              ),
-            ),
-            
-            const SizedBox(height: 20),
+                  // Step 1
+                  FadeInUp(
+                    delay: const Duration(milliseconds: 300),
+                    child: _buildStepCard(
+                      stepNumber: "1",
+                      title: "Add / Edit Details",
+                      description: "Provide details about your country, social media, education, and work experience.",
+                      icon: Icons.edit_note,
+                      isCompleted: isStep1Completed, 
+                      onTap: () async {
+                         final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const RepresentativeDetailsFormView()),
+                        );
+                        if (result == true) {
+                          _loadApplication();
+                        }
+                      },
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 20),
 
-            // Step 2
-            FadeInUp(
-              delay: const Duration(milliseconds: 400),
-              child: _buildStepCard(
-                stepNumber: "2",
-                title: "Add Video Portfolio",
-                description: "Record a short video explaining why you are the best fit for this role. (Required)",
-                icon: Icons.videocam,
-                isCompleted: _isStep2Completed,
-                isRequired: true,
-                isLocked: !_isStep1Completed, // Locked if Step 1 is not done
-                onTap: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const VideoPortfolioView()),
-                  );
-                  if (result == true) {
-                    setState(() {
-                      _isStep2Completed = true;
-                    });
-                  }
-                },
+                  // Step 2
+                  FadeInUp(
+                    delay: const Duration(milliseconds: 400),
+                    child: _buildStepCard(
+                      stepNumber: "2",
+                      title: "Add Video Portfolio",
+                      description: "Record a short video explaining why you are the best fit for this role. (Required)",
+                      icon: Icons.videocam,
+                      isCompleted: isStep2Completed,
+                      isRequired: true,
+                      isLocked: !isStep1Completed,
+                      onTap: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const VideoPortfolioView()),
+                        );
+                        if (result == true) {
+                          _loadApplication();
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
+          );
+        },
       ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(20),
@@ -176,9 +192,9 @@ class _CountryRepresentativeDetailsViewState extends State<CountryRepresentative
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))],
         ),
         child: ElevatedButton(
-          onPressed: null, // Disabled until steps are complete
+          onPressed: null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.grey, // Disabled color initially
+            backgroundColor: AppColors.grey,
             padding: const EdgeInsets.symmetric(vertical: 15),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),

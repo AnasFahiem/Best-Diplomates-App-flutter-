@@ -1,31 +1,30 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/datasources/auth_remote_data_source.dart';
 import '../../domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
+  Map<String, dynamic>? _loggedInProfile;
 
   AuthRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<AuthResponse> signIn({required String email, required String password}) async {
-    return await remoteDataSource.signInWithPassword(email: email, password: password);
+  Future<Map<String, dynamic>?> signIn({required String username, required String password}) async {
+    final profile = await remoteDataSource.loginWithCredentials(username: username, password: password);
+    if (profile != null) {
+      _loggedInProfile = profile;
+    }
+    return profile;
   }
 
   @override
-  Future<AuthResponse> signUp({required String email, required String password, required String firstName, required String lastName}) async {
-    return await remoteDataSource.signUp(
-      email: email, 
-      password: password, 
-      data: {
-        'first_name': firstName,
-        'last_name': lastName,
-      },
-    );
+  Future<void> changePassword({required String userId, required String newPassword}) async {
+    await remoteDataSource.changePassword(userId: userId, newPassword: newPassword);
+    _loggedInProfile = null; // Clear profile to force re-login
   }
 
   @override
   Future<void> signOut() async {
+    _loggedInProfile = null;
     await remoteDataSource.signOut();
   }
 
@@ -35,13 +34,13 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> resetPasswordForEmail({required String email}) async {
-    await remoteDataSource.resetPasswordForEmail(email: email);
+  Future<String> resetPassword({required String username}) async {
+    return await remoteDataSource.resetPassword(username: username);
   }
 
   @override
-  bool get isLoggedIn => remoteDataSource.currentSession != null;
+  bool get isLoggedIn => _loggedInProfile != null;
 
   @override
-  User? get currentUser => remoteDataSource.currentUser;
+  Map<String, dynamic>? get currentUserProfile => _loggedInProfile;
 }

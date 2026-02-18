@@ -1,13 +1,13 @@
+import 'dart:math';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<AuthResponse> signInWithPassword({required String email, required String password});
-  Future<AuthResponse> signUp({required String email, required String password, required Map<String, dynamic> data});
+  Future<Map<String, dynamic>?> loginWithCredentials({required String username, required String password});
+  Future<void> changePassword({required String userId, required String newPassword});
   Future<void> signOut();
   Future<void> deleteAccount();
-  Future<void> resetPasswordForEmail({required String email});
+  Future<String> resetPassword({required String username});
   Session? get currentSession;
-  User? get currentUser;
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -16,34 +16,69 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl({required this.supabaseClient});
 
   @override
-  Future<AuthResponse> signInWithPassword({required String email, required String password}) async {
-    return await supabaseClient.auth.signInWithPassword(email: email, password: password);
+  Future<Map<String, dynamic>?> loginWithCredentials({required String username, required String password}) async {
+    final response = await supabaseClient
+        .from('profiles')
+        .select()
+        .eq('username', username)
+        .eq('login_password', password)
+        .maybeSingle();
+
+    return response;
   }
 
   @override
-  Future<AuthResponse> signUp({required String email, required String password, required Map<String, dynamic> data}) async {
-    return await supabaseClient.auth.signUp(email: email, password: password, data: data);
+  Future<void> changePassword({required String userId, required String newPassword}) async {
+    await supabaseClient
+        .from('profiles')
+        .update({
+          'login_password': newPassword,
+          'password_changed': true,
+        })
+        .eq('id', userId);
   }
 
   @override
   Future<void> signOut() async {
+    // Clear any local session state if needed
     await supabaseClient.auth.signOut();
   }
 
   @override
   Future<void> deleteAccount() async {
-    // Call the Postgres function 'delete_user' we created
     await supabaseClient.rpc('delete_user');
   }
 
   @override
-  Future<void> resetPasswordForEmail({required String email}) async {
-    await supabaseClient.auth.resetPasswordForEmail(email);
+  Future<String> resetPassword({required String username}) async {
+    // Verify this username exists
+    final user = await supabaseClient
+        .from('profiles')
+        .select('id')
+        .eq('username', username)
+        .maybeSingle();
+
+    if (user == null) {
+      throw Exception('No account found with that username');
+    }
+
+    // Generate a random temporary password
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final random = Random();
+    final tempPassword = List.generate(8, (_) => chars[random.nextInt(chars.length)]).join();
+
+    // Update login_password and force password change on next login
+    await supabaseClient
+        .from('profiles')
+        .update({
+          'login_password': tempPassword,
+          'password_changed': false,
+        })
+        .eq('id', user['id']);
+
+    return tempPassword;
   }
 
   @override
   Session? get currentSession => supabaseClient.auth.currentSession;
-
-  @override
-  User? get currentUser => supabaseClient.auth.currentUser;
 }

@@ -7,6 +7,7 @@ import '../viewmodels/auth_view_model.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
+import 'change_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,15 +18,19 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
 
   @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // You'd typically use GetIt or Provider to access AuthViewModel, 
-    // ensuring it's provided at the top level or here.
-    // For now, I'll assume it's provided or I'll use ChangeNotifierProvider here locally for simplicity if not in main.
     return Consumer<AuthViewModel>(
             builder: (context, authViewModel, child) {
               return Scaffold(
@@ -59,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         FadeInDown(
                           delay: const Duration(milliseconds: 200),
                           child: Text(
-                            "Sign in to continue",
+                            "Enter your credentials to continue",
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               color: AppColors.textSecondary,
@@ -74,17 +79,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               FadeInUp(
                                 delay: const Duration(milliseconds: 300),
                                 child: TextFormField(
-                                  controller: _emailController,
+                                  controller: _usernameController,
                                   decoration: const InputDecoration(
-                                    labelText: "Email",
-                                    prefixIcon: Icon(Icons.email_outlined),
+                                    labelText: "Username",
+                                    prefixIcon: Icon(Icons.person_outline),
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
-                                      return 'Please enter your email';
-                                    }
-                                    if (!value.contains('@')) {
-                                        return 'Please enter a valid email';
+                                      return 'Please enter your username';
                                     }
                                     return null;
                                   },
@@ -155,13 +157,21 @@ class _LoginScreenState extends State<LoginScreen> {
                                         : () async {
                                             if (_formKey.currentState!.validate()) {
                                               bool success = await authViewModel.login(
-                                                  _emailController.text,
+                                                  _usernameController.text.trim(),
                                                   _passwordController.text);
                                               if (success && context.mounted) {
-                                                 Navigator.pushReplacement(
+                                                if (authViewModel.mustChangePassword) {
+                                                  // First login — force password change
+                                                  Navigator.pushReplacement(
+                                                    context,
+                                                    MaterialPageRoute(builder: (context) => const ChangePasswordScreen()),
+                                                  );
+                                                } else {
+                                                  Navigator.pushReplacement(
                                                     context,
                                                     MaterialPageRoute(builder: (context) => const HomeScreen()),
                                                   );
+                                                }
                                               } else if (context.mounted) {
                                                 ScaffoldMessenger.of(context).showSnackBar(
                                                   SnackBar(
@@ -202,7 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           );
                                       },
                                       child: Text(
-                                        "Sign Up",
+                                        "Register",
                                         style: GoogleFonts.inter(
                                           color: AppColors.primaryBlue,
                                           fontWeight: FontWeight.bold,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/repositories/auth_repository.dart';
 
 class AuthViewModel extends ChangeNotifier {
@@ -13,44 +12,23 @@ class AuthViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  Future<bool> login(String email, String password) async {
+  Future<bool> login(String username, String password) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      await _authRepository.signIn(email: email, password: password);
+      final profile = await _authRepository.signIn(username: username, password: password);
       _isLoading = false;
       notifyListeners();
-      return true;
-    } on AuthException catch (e) {
-      _errorMessage = e.message;
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    } catch (e) {
-      _errorMessage = 'An unexpected error occurred';
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-  }
 
-  Future<bool> signup(String firstName, String lastName, String email, String password) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      await _authRepository.signUp(email: email, password: password, firstName: firstName, lastName: lastName);
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } on AuthException catch (e) {
-      _errorMessage = e.message;
-      _isLoading = false;
-      notifyListeners();
-      return false;
+      if (profile != null) {
+        return true;
+      } else {
+        _errorMessage = 'Invalid username or password';
+        notifyListeners();
+        return false;
+      }
     } catch (e) {
       _errorMessage = 'An unexpected error occurred';
       _isLoading = false;
@@ -64,26 +42,21 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> sendPasswordResetEmail(String email) async {
+  Future<String?> resetPassword(String username) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      await _authRepository.resetPasswordForEmail(email: email);
+      final tempPassword = await _authRepository.resetPassword(username: username);
       _isLoading = false;
       notifyListeners();
-      return true;
-    } on AuthException catch (e) {
-      _errorMessage = e.message;
-      _isLoading = false;
-      notifyListeners();
-      return false;
+      return tempPassword;
     } catch (e) {
-      _errorMessage = 'Failed to send reset email';
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
       _isLoading = false;
       notifyListeners();
-      return false;
+      return null;
     }
   }
 
@@ -94,7 +67,6 @@ class AuthViewModel extends ChangeNotifier {
 
     try {
       await _authRepository.deleteAccount();
-      // After successful deletion, sign out locally to clear session
       await _authRepository.signOut();
       
       _isLoading = false;
@@ -108,6 +80,38 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  User? get currentUser => _authRepository.currentUser;
-}
+  Map<String, dynamic>? get currentUserProfile => _authRepository.currentUserProfile;
 
+  /// Whether the user must change their password (first login with received credentials)
+  bool get mustChangePassword {
+    final profile = _authRepository.currentUserProfile;
+    if (profile == null) return false;
+    return profile['password_changed'] != true;
+  }
+
+  Future<bool> changePassword(String newPassword) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final userId = _authRepository.currentUserProfile?['id'];
+      if (userId == null) {
+        _errorMessage = 'User not found';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      await _authRepository.changePassword(userId: userId.toString(), newPassword: newPassword);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Failed to change password: ${e.toString()}';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+}

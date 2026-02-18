@@ -6,7 +6,7 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 import 'package:image_picker/image_picker.dart';
 import 'package:mrz_parser/mrz_parser.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../auth/presentation/viewmodels/auth_view_model.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/responsive_constants.dart';
 import '../../../../core/utils/responsive_utils.dart';
@@ -45,7 +45,8 @@ class _AccountVerificationViewState extends State<AccountVerificationView> {
   Future<void> _loadExistingVerification() async {
     try {
       final profileViewModel = Provider.of<ProfileViewModel>(context, listen: false);
-      final userId = Supabase.instance.client.auth.currentUser?.id;
+      final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+      final userId = authViewModel.currentUserProfile?['id'];
       
       if (userId == null) {
         setState(() => _isLoading = false);
@@ -155,7 +156,8 @@ class _AccountVerificationViewState extends State<AccountVerificationView> {
   Future<void> _saveVerificationData() async {
     try {
       final profileViewModel = Provider.of<ProfileViewModel>(context, listen: false);
-      final userId = Supabase.instance.client.auth.currentUser?.id;
+      final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+      final userId = authViewModel.currentUserProfile?['id'];
       
       if (userId == null || _scannedPassportData == null) {
         print('Cannot save verification: missing userId or passport data');

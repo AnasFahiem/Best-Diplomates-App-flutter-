@@ -147,7 +147,7 @@ class OpportunitiesView extends StatelessWidget {
                 const SizedBox(height: 25),
                 FadeInDown(
                  child: Text(
-                    "Join Best Diplomats Team",
+                    "Join Future Diplomats Team",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
                       fontSize: 22,

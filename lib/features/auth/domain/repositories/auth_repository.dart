@@ -1,11 +1,9 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 abstract class AuthRepository {
-  Future<AuthResponse> signIn({required String email, required String password});
-  Future<AuthResponse> signUp({required String email, required String password, required String firstName, required String lastName});
+  Future<Map<String, dynamic>?> signIn({required String username, required String password});
+  Future<void> changePassword({required String userId, required String newPassword});
   Future<void> signOut();
   Future<void> deleteAccount();
-  Future<void> resetPasswordForEmail({required String email});
+  Future<String> resetPassword({required String username});
   bool get isLoggedIn;
-  User? get currentUser;
+  Map<String, dynamic>? get currentUserProfile;
 }

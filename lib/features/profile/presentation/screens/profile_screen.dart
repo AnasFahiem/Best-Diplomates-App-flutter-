@@ -26,8 +26,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final authVM = Provider.of<AuthViewModel>(context, listen: false);
       final profileVM = Provider.of<ProfileViewModel>(context, listen: false);
       
-      if (authVM.currentUser != null && profileVM.userProfile == null) {
-        profileVM.fetchProfile(authVM.currentUser!.id);
+      if (authVM.currentUserProfile != null && profileVM.userProfile == null) {
+        profileVM.fetchProfile(authVM.currentUserProfile!['id']);
       }
     });
   }
@@ -36,26 +36,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Consumer2<AuthViewModel, ProfileViewModel>(
       builder: (context, authViewModel, profileViewModel, child) {
-        final user = authViewModel.currentUser;
+        final userProfile = authViewModel.currentUserProfile;
         final profile = profileViewModel.userProfile;
         
-        // Use profile data if available, otherwise auth metadata
+        // Use profile data if available, otherwise logged-in profile map
         String name = 'Guest User';
         if (profile != null) {
           name = profile.fullName;
-        } else if (user != null) {
-          final meta = user.userMetadata;
-          if (meta != null) {
-            if (meta.containsKey('first_name') || meta.containsKey('last_name')) {
-              name = "${meta['first_name'] ?? ''} ${meta['last_name'] ?? ''}".trim();
-            } else if (meta.containsKey('full_name')) {
-              name = meta['full_name'];
-            }
-          }
+        } else if (userProfile != null) {
+          final firstName = userProfile['first_name'] ?? '';
+          final lastName = userProfile['last_name'] ?? '';
+          name = '$firstName $lastName'.trim();
         }
         if (name.isEmpty) name = 'Guest User';
                 
-        final email = profile?.email ?? user?.email ?? 'guest@example.com';
+        final email = profile?.email ?? userProfile?['email'] ?? 'guest@example.com';
         
         final avatarUrl = profile?.avatarUrl;
 

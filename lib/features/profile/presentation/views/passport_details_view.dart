@@ -31,11 +31,11 @@ class _PassportDetailsViewState extends State<PassportDetailsView> {
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
        final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
-       final user = authViewModel.currentUser;
-       if (user != null) {
+       final userProfile = authViewModel.currentUserProfile;
+       if (userProfile != null) {
           final profileViewModel = Provider.of<ProfileViewModel>(context, listen: false);
           if (profileViewModel.userProfile == null) {
-             profileViewModel.fetchProfile(user.id).then((_) {
+             profileViewModel.fetchProfile(userProfile['id']).then((_) {
                 _populateControllers();
              });
           } else {
@@ -95,15 +95,15 @@ class _PassportDetailsViewState extends State<PassportDetailsView> {
       
       if (mounted) {
          final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
-         final user = authViewModel.currentUser;
-         if (user != null) {
+         final userProfile = authViewModel.currentUserProfile;
+         if (userProfile != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Uploading image...')),
             );
             
             try {
                await Provider.of<ProfileViewModel>(context, listen: false)
-                   .uploadPassportImage(user.id, pickedFile);
+                   .uploadPassportImage(userProfile['id'], pickedFile);
                
                if (mounted) {
                  ScaffoldMessenger.of(context).showSnackBar(
@@ -149,10 +149,10 @@ class _PassportDetailsViewState extends State<PassportDetailsView> {
 
   Future<void> _saveDetails() async {
      final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
-     final user = authViewModel.currentUser;
+     final userProfile = authViewModel.currentUserProfile;
      final profileViewModel = Provider.of<ProfileViewModel>(context, listen: false);
      
-     if (user != null && profileViewModel.userProfile != null) {
+     if (userProfile != null && profileViewModel.userProfile != null) {
         final updatedProfile = profileViewModel.userProfile!.copyWith(
           passportNumber: _passportNumberController.text,
           passportExpiryDate: _expiryDateController.text,

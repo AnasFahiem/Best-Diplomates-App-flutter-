@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,12 +16,12 @@ class ForgotPasswordScreen extends StatefulWidget {
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  bool _emailSent = false;
+  final _usernameController = TextEditingController();
+  String? _tempPassword;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     super.dispose();
   }
 
@@ -64,9 +65,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   FadeInDown(
                     delay: const Duration(milliseconds: 200),
                     child: Text(
-                      _emailSent
-                          ? "Check your email for a password reset link"
-                          : "Enter your email address and we'll send you a link to reset your password",
+                      _tempPassword != null
+                          ? "Your password has been reset successfully"
+                          : "Enter your username and we'll generate a new temporary password for you",
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         color: AppColors.textSecondary,
@@ -74,7 +75,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                   ),
                   const SizedBox(height: 50),
-                  if (!_emailSent) ...[
+
+                  // ── Form: enter username ──
+                  if (_tempPassword == null) ...[
                     Form(
                       key: _formKey,
                       child: Column(
@@ -82,17 +85,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           FadeInUp(
                             delay: const Duration(milliseconds: 300),
                             child: TextFormField(
-                              controller: _emailController,
+                              controller: _usernameController,
                               decoration: const InputDecoration(
-                                labelText: "Email",
-                                prefixIcon: Icon(Icons.email_outlined),
+                                labelText: "Username",
+                                prefixIcon: Icon(Icons.person_outline),
                               ),
                               validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your email';
-                                }
-                                if (!value.contains('@')) {
-                                  return 'Please enter a valid email';
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter your username';
                                 }
                                 return null;
                               },
@@ -109,20 +109,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                     ? null
                                     : () async {
                                         if (_formKey.currentState!.validate()) {
-                                          bool success = await authViewModel
-                                              .sendPasswordResetEmail(
-                                                  _emailController.text);
-                                          if (success && context.mounted) {
+                                          final result = await authViewModel
+                                              .resetPassword(_usernameController.text.trim());
+                                          if (result != null && context.mounted) {
                                             setState(() {
-                                              _emailSent = true;
+                                              _tempPassword = result;
                                             });
                                           } else if (context.mounted) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
+                                            ScaffoldMessenger.of(context).showSnackBar(
                                               SnackBar(
-                                                content: Text(authViewModel
-                                                        .errorMessage ??
-                                                    'Failed to send reset email'),
+                                                content: Text(
+                                                    authViewModel.errorMessage ??
+                                                        'Failed to reset password'),
                                                 backgroundColor: Colors.red,
                                               ),
                                             );
@@ -133,7 +131,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                     ? const CircularProgressIndicator(
                                         color: AppColors.white)
                                     : Text(
-                                        "SEND RESET LINK",
+                                        "RESET PASSWORD",
                                         style: GoogleFonts.inter(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 16,
@@ -145,6 +143,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         ],
                       ),
                     ),
+
+                  // ── Success: show the temp password ──
                   ] else ...[
                     FadeInUp(
                       child: Container(
@@ -154,29 +154,87 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.green.shade200),
                         ),
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.check_circle,
-                                color: Colors.green.shade700, size: 40),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                            Row(
+                              children: [
+                                Icon(Icons.check_circle, color: Colors.green.shade700, size: 28),
+                                const SizedBox(width: 10),
+                                Text(
+                                  "Password Reset!",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green.shade700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              "Your new temporary password is:",
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              decoration: BoxDecoration(
+                                color: AppColors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.3)),
+                              ),
+                              child: Row(
                                 children: [
-                                  Text(
-                                    "Email Sent!",
-                                    style: GoogleFonts.inter(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.green.shade700,
+                                  Expanded(
+                                    child: SelectableText(
+                                      _tempPassword!,
+                                      style: GoogleFonts.sourceCodePro(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.primaryBlue,
+                                        letterSpacing: 2,
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "Check your inbox for the password reset link",
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14,
-                                      color: Colors.green.shade700,
+                                  IconButton(
+                                    icon: const Icon(Icons.copy, color: AppColors.primaryBlue),
+                                    tooltip: "Copy to clipboard",
+                                    onPressed: () {
+                                      Clipboard.setData(ClipboardData(text: _tempPassword!));
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text("Password copied to clipboard")),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.amber.shade300),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.warning_amber_rounded, color: Colors.amber.shade700, size: 20),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      "Please save this password and use it to log in. You will be asked to set a new password on your next login.",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 13,
+                                        color: Colors.amber.shade800,
+                                        height: 1.4,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -205,6 +263,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                     ),
                   ],
+
                   const SizedBox(height: 20),
                   FadeInUp(
                     delay: const Duration(milliseconds: 500),

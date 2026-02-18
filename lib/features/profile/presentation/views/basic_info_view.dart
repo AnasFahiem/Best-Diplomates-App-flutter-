@@ -99,9 +99,9 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
     // Fetch profile data when screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
-      final user = authViewModel.currentUser;
-      if (user != null) {
-        Provider.of<ProfileViewModel>(context, listen: false).fetchProfile(user.id);
+      final userProfile = authViewModel.currentUserProfile;
+      if (userProfile != null) {
+        Provider.of<ProfileViewModel>(context, listen: false).fetchProfile(userProfile['id']);
       }
     });
   }
@@ -218,8 +218,8 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
       // Auto upload if user is logged in
       if (mounted) {
          final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
-         final user = authViewModel.currentUser;
-         if (user != null) {
+         final userProfile = authViewModel.currentUserProfile;
+         if (userProfile != null) {
             // Show blocking loading dialog
             showDialog(
               context: context,
@@ -258,7 +258,7 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
               final profileViewModel = Provider.of<ProfileViewModel>(context, listen: false);
               
               // 1. Upload Avatar
-              await profileViewModel.uploadAvatar(user.id, _imageFile!);
+              await profileViewModel.uploadAvatar(userProfile['id'], _imageFile!);
               
               if (mounted) {
                 // Close loading dialog
@@ -304,14 +304,14 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
   Future<void> _saveProfile() async {
     if (_formKey.currentState!.validate()) {
        final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
-       final user = authViewModel.currentUser;
+       final userProfile = authViewModel.currentUserProfile;
        
-       if (user != null) {
+       if (userProfile != null) {
          final viewModel = Provider.of<ProfileViewModel>(context, listen: false);
          final currentProfile = viewModel.userProfile;
 
          final profile = UserProfile(
-           id: user.id,
+           id: userProfile['id'],
            firstName: _firstNameController.text,
            lastName: _lastNameController.text,
            email: _emailController.text,
@@ -432,38 +432,41 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
                   Center(
                     child: Stack(
                       children: [
-                        Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppColors.white,
-                            border: Border.all(color: AppColors.white, width: 2),
-                          ),
-                          child: ClipOval(
-                            child: (backgroundImage != null)
-                                ? (kIsWeb 
-                                   ? Image.network(
-                                       (backgroundImage as NetworkImage).url, 
-                                       fit: BoxFit.cover,
-                                       errorBuilder: (context, error, stackTrace) {
-                                         // print('IMAGE LOAD ERROR: $error'); 
-                                         // ignoring print usage for linter
-                                         return const Center(child: Icon(Icons.broken_image, color: Colors.red));
-                                       },
-                                     ) 
-                                   : Image(
-                                      image: backgroundImage, 
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) {
-                                         return const Center(child: Icon(Icons.broken_image, color: Colors.blue));
-                                      },
+                        GestureDetector(
+                          onTap: _pickImage,
+                          child: Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.white,
+                              border: Border.all(color: AppColors.white, width: 2),
+                            ),
+                            child: ClipOval(
+                              child: (backgroundImage != null)
+                                  ? (kIsWeb 
+                                     ? Image.network(
+                                         (backgroundImage as NetworkImage).url, 
+                                         fit: BoxFit.cover,
+                                         errorBuilder: (context, error, stackTrace) {
+                                           // print('IMAGE LOAD ERROR: $error'); 
+                                           // ignoring print usage for linter
+                                           return const Center(child: Icon(Icons.broken_image, color: Colors.red));
+                                         },
+                                       ) 
+                                     : Image(
+                                        image: backgroundImage, 
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                           return const Center(child: Icon(Icons.broken_image, color: Colors.blue));
+                                        },
+                                      )
                                     )
-                                  )
-                                : CircleAvatar(
-                                    backgroundColor: AppColors.primaryBlue,
-                                    child: Text(initials, style: const TextStyle(fontSize: 30, color: AppColors.white)),
-                                  ),
+                                  : CircleAvatar(
+                                      backgroundColor: AppColors.primaryBlue,
+                                      child: Text(initials, style: const TextStyle(fontSize: 30, color: AppColors.white)),
+                                    ),
+                            ),
                           ),
                         ),
                         Positioned(
@@ -521,6 +524,7 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
                       onTap: () {
                         showCountryPicker(
                           context: context,
+                          exclude: ['IR', 'IL', 'ET'],
                           onSelect: (Country country) {
                             setState(() {
                               _nationalityController.text = country.name;

@@ -12,7 +12,11 @@ import 'features/home/data/repositories/home_repository_impl.dart';
 import 'features/home/data/datasources/home_remote_data_source.dart';
 import 'features/profile/presentation/viewmodels/profile_view_model.dart';
 import 'features/profile/data/repositories/profile_repository_impl.dart';
+import 'features/home/presentation/viewmodels/application_view_model.dart';
+import 'features/home/data/repositories/application_repository_impl.dart';
+import 'features/home/data/datasources/application_remote_data_source.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'core/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +25,8 @@ void main() async {
     url: 'https://ewdsxnsxajmfbpoierqj.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV3ZHN4bnN4YWptZmJwb2llcnFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMTU5MzgsImV4cCI6MjA4NTc5MTkzOH0.YpylbCyU2ySsVf_2mo4P96QXz6nGBW6MrxDb1aBTY7A',
   );
+
+  await NotificationService.instance.initialize();
 
   runApp(const MyApp());
 }
@@ -51,9 +57,16 @@ class MyApp extends StatelessWidget {
             Supabase.instance.client,
           ),
         )),
+        ChangeNotifierProvider(create: (_) => ApplicationViewModel(
+          repository: ApplicationRepositoryImpl(
+            remoteDataSource: ApplicationRemoteDataSourceImpl(
+              supabaseClient: Supabase.instance.client,
+            ),
+          ),
+        )),
       ],
       child: MaterialApp(
-        title: 'Best Diplomats',
+        title: 'Future Diplomats',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         home: const SplashScreen(),

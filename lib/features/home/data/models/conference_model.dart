@@ -23,7 +23,7 @@ class ConferenceModel {
 
   factory ConferenceModel.fromJson(Map<String, dynamic> json) {
     String city = json['city']?.toString() ?? 'Unknown Location';
-    String extractedTitle = json['title']?.toString() ?? 'Best Diplomats $city';
+    String extractedTitle = json['title']?.toString() ?? 'Future Diplomats $city';
     
     // Parse dates if start_date is null but 'dates' string exists (e.g. "July 15-20, 2026")
     // For now, simpler fallback

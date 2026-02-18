@@ -1,79 +1,52 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:best_diplomats/features/auth/presentation/viewmodels/auth_view_model.dart';
 import 'package:best_diplomats/features/auth/domain/repositories/auth_repository.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MockAuthRepository implements AuthRepository {
   bool shouldThrowError = false;
-  bool shouldThrowAuthException = false;
+  bool shouldReturnNull = false;
   
-  User? _mockUser;
+  Map<String, dynamic>? _mockProfile;
   bool _isLoggedIn = false;
 
-  void setMockUser(User user) {
-    _mockUser = user;
-    _isLoggedIn = true;
-  }
-
   @override
-  Future<AuthResponse> signIn({required String email, required String password}) async {
+  Future<Map<String, dynamic>?> signIn({required String username, required String password}) async {
     if (shouldThrowError) throw Exception('Unexpected error');
-    if (shouldThrowAuthException) throw const AuthException('Invalid login credentials');
+    if (shouldReturnNull) return null;
     
     _isLoggedIn = true;
-    _mockUser = User(
-      id: '123',
-      email: email,
-      createdAt: DateTime.now().toIso8601String(),
-      appMetadata: {},
-      userMetadata: {},
-      aud: 'authenticated',
-    );
-    return AuthResponse(
-      session: Session(
-        accessToken: 'token', 
-        tokenType: 'bearer', 
-        user: _mockUser!,
-      ), 
-      user: _mockUser!,
-    );
-  }
-
-  @override
-  Future<AuthResponse> signUp({required String email, required String password, required String fullName}) async {
-    if (shouldThrowError) throw Exception('Unexpected error');
-    if (shouldThrowAuthException) throw const AuthException('Signup failed');
-
-    _isLoggedIn = true;
-    _mockUser = User(
-      id: '123',
-      email: email,
-      createdAt: DateTime.now().toIso8601String(),
-      appMetadata: {},
-      userMetadata: {'full_name': fullName},
-      aud: 'authenticated',
-    );
-    return AuthResponse(
-      session: Session(
-        accessToken: 'token', 
-        tokenType: 'bearer', 
-        user: _mockUser!,
-      ), 
-      user: _mockUser!,
-    );
+    _mockProfile = {
+      'id': '123',
+      'username': username,
+      'login_password': password,
+      'first_name': 'Test',
+      'last_name': 'User',
+    };
+    return _mockProfile;
   }
 
   @override
   Future<void> signOut() async {
     _isLoggedIn = false;
-    _mockUser = null;
+    _mockProfile = null;
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    _isLoggedIn = false;
+    _mockProfile = null;
+  }
+
+  @override
+  Future<void> resetPasswordForEmail({required String email}) async {
+    if (shouldThrowError) throw Exception('Failed to send reset email');
   }
 
   @override
   bool get isLoggedIn => _isLoggedIn;
 
   @override
-  User? get currentUser => _mockUser;
+  Map<String, dynamic>? get currentUserProfile => _mockProfile;
 }
 
 void main() {
@@ -88,38 +61,38 @@ void main() {
   test('Initial state checks', () {
     expect(viewModel.isLoading, false);
     expect(viewModel.errorMessage, null);
-    expect(viewModel.currentUser, null);
+    expect(viewModel.currentUserProfile, null);
   });
 
-  test('login success', () async {
-    final result = await viewModel.login('test@example.com', 'password');
+  test('login success with valid credentials', () async {
+    final result = await viewModel.login('FD-testuser', 'TestPass123');
     expect(result, true);
     expect(viewModel.isLoading, false);
     expect(viewModel.errorMessage, null);
-    expect(viewModel.currentUser?.email, 'test@example.com');
+    expect(viewModel.currentUserProfile?['username'], 'FD-testuser');
   });
 
-  test('login failure with AuthException', () async {
-    mockRepository.shouldThrowAuthException = true;
-    final result = await viewModel.login('test@example.com', 'password');
+  test('login failure with invalid credentials', () async {
+    mockRepository.shouldReturnNull = true;
+    final result = await viewModel.login('wrong-user', 'wrongpass');
     expect(result, false);
     expect(viewModel.isLoading, false);
-    expect(viewModel.errorMessage, 'Invalid login credentials');
+    expect(viewModel.errorMessage, 'Invalid username or password');
   });
 
-  test('signup success', () async {
-    final result = await viewModel.signup('Test User', 'test@example.com', 'password');
-    expect(result, true);
+  test('login failure with unexpected error', () async {
+    mockRepository.shouldThrowError = true;
+    final result = await viewModel.login('test', 'password');
+    expect(result, false);
     expect(viewModel.isLoading, false);
-    expect(viewModel.errorMessage, null);
-    expect(viewModel.currentUser?.userMetadata?['full_name'], 'Test User');
+    expect(viewModel.errorMessage, 'An unexpected error occurred');
   });
 
-  test('signOut clears user', () async {
-    await viewModel.login('test@example.com', 'password');
-    expect(viewModel.currentUser, isNotNull);
+  test('signOut clears user profile', () async {
+    await viewModel.login('FD-testuser', 'TestPass123');
+    expect(viewModel.currentUserProfile, isNotNull);
     
     await viewModel.signOut();
-    expect(viewModel.currentUser, null);
+    expect(viewModel.currentUserProfile, null);
   });
 }
