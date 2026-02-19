@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'package:flutter/foundation.dart';
 
 abstract class AuthRemoteDataSource {
   Future<Map<String, dynamic>?> loginWithCredentials({required String username, required String password});

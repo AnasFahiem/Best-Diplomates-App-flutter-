@@ -4,20 +4,20 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../auth/presentation/viewmodels/auth_view_model.dart';
-import '../../../auth/presentation/screens/login_screen.dart';
+import '../../../auth/presentation/views/login_view.dart'; // Anticipating change
 import '../../data/datasources/admin_remote_data_source.dart';
 import '../viewmodels/admin_view_model.dart';
-import '../views/admin_chat_view.dart';
-import '../views/admin_announcements_view.dart';
+import 'admin_chat_view.dart';
+import 'admin_announcements_view.dart';
 
-class AdminDashboardScreen extends StatefulWidget {
-  const AdminDashboardScreen({super.key});
+class AdminDashboardView extends StatefulWidget {
+  const AdminDashboardView({super.key});
 
   @override
-  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+  State<AdminDashboardView> createState() => _AdminDashboardViewState();
 }
 
-class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+class _AdminDashboardViewState extends State<AdminDashboardView> {
   int _selectedIndex = 0;
   late AdminViewModel _adminViewModel;
 
@@ -111,7 +111,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     if (context.mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        MaterialPageRoute(builder: (_) => const LoginView()), // Updated
       );
     }
   }

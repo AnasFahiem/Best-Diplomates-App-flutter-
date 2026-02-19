@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
-import 'features/onboarding/presentation/screens/splash_screen.dart';
+import 'features/onboarding/presentation/views/splash_view.dart';
 
 import 'features/auth/presentation/viewmodels/auth_view_model.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
@@ -79,7 +79,7 @@ class MyApp extends StatelessWidget {
         title: 'Future Diplomats',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
-        home: const SplashScreen(),
+        home: const SplashView(),
       ),
     );
   }

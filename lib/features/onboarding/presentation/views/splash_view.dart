@@ -3,21 +3,21 @@ import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../auth/presentation/screens/login_screen.dart';
-import '../../../../features/home/presentation/screens/home_screen.dart';
-import '../../../../features/admin/presentation/screens/admin_dashboard_screen.dart';
+import '../../../auth/presentation/views/login_view.dart'; // Updated
+import '../../../../features/home/presentation/views/home_view.dart'; // Updated
+import '../../../../features/admin/presentation/views/admin_dashboard_view.dart'; // Updated
 import 'package:provider/provider.dart';
 import '../../../auth/presentation/viewmodels/auth_view_model.dart';
-import 'onboarding_screen.dart';
+import 'onboarding_view.dart'; // Anticipating change
 
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+class SplashView extends StatefulWidget {
+  const SplashView({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  State<SplashView> createState() => _SplashViewState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashViewState extends State<SplashView> {
   @override
   void initState() {
     super.initState();
@@ -38,14 +38,14 @@ class _SplashScreenState extends State<SplashScreen> {
     
     if (isLoggedIn) {
       if (authVM.isAdmin) {
-        nextScreen = const AdminDashboardScreen();
+        nextScreen = const AdminDashboardView(); // Updated
       } else {
-        nextScreen = const HomeScreen();
+        nextScreen = const HomeView(); // Updated
       }
     } else {
       final prefs = await SharedPreferences.getInstance();
       bool seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
-      nextScreen = seenOnboarding ? const LoginScreen() : const OnboardingScreen();
+      nextScreen = seenOnboarding ? const LoginView() : const OnboardingView(); // Updated
     }
 
     if (!mounted) return;

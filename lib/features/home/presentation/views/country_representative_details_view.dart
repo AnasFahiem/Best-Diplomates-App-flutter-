@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/responsive_constants.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../auth/presentation/viewmodels/auth_view_model.dart';

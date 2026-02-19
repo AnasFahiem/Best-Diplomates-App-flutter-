@@ -3,16 +3,16 @@ import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../auth/presentation/screens/login_screen.dart';
+import '../../../auth/presentation/views/login_view.dart'; // Updated
 
-class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key});
+class OnboardingView extends StatefulWidget {
+  const OnboardingView({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  State<OnboardingView> createState() => _OnboardingViewState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingViewState extends State<OnboardingView> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -20,7 +20,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     {
       "title": "Diplomatic Simulation",
       "desc": "Step into the shoes of a diplomat. Experience high-stakes negotiations and draft resolutions that change the world.",
-      "icon": "handshake" // using string to decide icon
+      "icon": "handshake"
     },
     {
       "title": "Global Networking",
@@ -113,7 +113,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       if (context.mounted) {
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => const LoginScreen()),
+                          MaterialPageRoute(builder: (context) => const LoginView()), // Updated
                         );
                       }
                     }

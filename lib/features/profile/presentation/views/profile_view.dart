@@ -8,17 +8,17 @@ import '../views/certificates_view.dart';
 import '../views/passport_details_view.dart';
 import '../views/support_center_view.dart';
 import '../views/account_verification_view.dart';
-import '../../../auth/presentation/screens/login_screen.dart';
+import '../../../auth/presentation/views/login_view.dart'; // Updated
 import '../../../auth/presentation/viewmodels/auth_view_model.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+class ProfileView extends StatefulWidget {
+  const ProfileView({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<ProfileView> createState() => _ProfileViewState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileViewState extends State<ProfileView> {
   @override
   void initState() {
     super.initState();
@@ -219,7 +219,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                  if (success) {
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      MaterialPageRoute(builder: (context) => const LoginView()), // Updated
                       (route) => false,
                     );
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -248,7 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             if (context.mounted) {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
+                MaterialPageRoute(builder: (context) => const LoginView()), // Updated
               );
             }
         }, 

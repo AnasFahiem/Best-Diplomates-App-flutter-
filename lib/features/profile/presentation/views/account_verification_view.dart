@@ -1,14 +1,11 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mrz_parser/mrz_parser.dart';
 import 'package:provider/provider.dart';
 import '../../../auth/presentation/viewmodels/auth_view_model.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/responsive_constants.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../domain/logic/liveness_detector.dart';
 import '../../domain/logic/passport_scanner.dart';

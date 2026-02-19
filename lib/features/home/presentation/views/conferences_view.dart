@@ -6,7 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/responsive_constants.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/widgets/responsive_layout.dart';
-import '../../../events/presentation/screens/event_details_screen.dart';
+import '../../../events/presentation/views/event_details_view.dart';
 import '../viewmodels/home_view_model.dart';
 import '../../data/models/conference_model.dart';
 
@@ -114,7 +114,7 @@ class ConferencesView extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => EventDetailsScreen(conference: conference)),
+          MaterialPageRoute(builder: (context) => EventDetailsView(conference: conference)),
         );
       },
       child: Container(
@@ -192,7 +192,7 @@ class ConferencesView extends StatelessWidget {
         onTap: () {
            Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => EventDetailsScreen(conference: conference)),
+          MaterialPageRoute(builder: (context) => EventDetailsView(conference: conference)),
         );
         },
         child: Container(

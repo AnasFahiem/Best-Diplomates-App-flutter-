@@ -1,4 +1,3 @@
-import 'package:camera/camera.dart';
 
 enum VerificationStep {
   instruction,

@@ -4,10 +4,10 @@ import 'package:animate_do/animate_do.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../home/data/models/conference_model.dart';
 
-class EventDetailsScreen extends StatelessWidget {
+class EventDetailsView extends StatelessWidget {
   final ConferenceModel conference;
 
-  const EventDetailsScreen({super.key, required this.conference});
+  const EventDetailsView({super.key, required this.conference});
 
   /// Generate timeline entries from start/end dates
   List<_TimelineEntry> _generateTimeline() {
@@ -429,7 +429,7 @@ class EventDetailsScreen extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: AppColors.gold,
                               borderRadius: BorderRadius.circular(20),
-                            ),
+                              ),
                             child: Text(
                               "TODAY",
                               style: GoogleFonts.poppins(

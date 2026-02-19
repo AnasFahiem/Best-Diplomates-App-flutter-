@@ -5,8 +5,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../viewmodels/admin_view_model.dart';
 import '../widgets/admin_chat_ui_components.dart';
 
-class AdminChatDetailScreen extends StatelessWidget {
-  const AdminChatDetailScreen({super.key});
+class AdminChatDetailView extends StatelessWidget {
+  const AdminChatDetailView({super.key});
 
   @override
   Widget build(BuildContext context) {

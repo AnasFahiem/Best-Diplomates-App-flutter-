@@ -181,7 +181,7 @@ class _ModeratorApplicationFormViewState extends State<ModeratorApplicationFormV
           Text("I'm a", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: AppColors.primaryBlue)),
           const SizedBox(height: 10),
           DropdownButtonFormField<String>(
-            value: _selectedRole,
+            initialValue: _selectedRole,
             decoration: _inputDecoration(null),
             items: _roles.map((role) => DropdownMenuItem(value: role, child: Text(role))).toList(),
             onChanged: (val) => setState(() => _selectedRole = val!),

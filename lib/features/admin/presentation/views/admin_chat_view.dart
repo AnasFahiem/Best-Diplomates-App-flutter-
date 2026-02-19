@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../viewmodels/admin_view_model.dart';
 import '../widgets/admin_chat_ui_components.dart';
-import '../screens/admin_chat_detail_screen.dart';
+import '../views/admin_chat_detail_view.dart';
 
 class AdminChatView extends StatelessWidget {
   const AdminChatView({super.key});
@@ -77,7 +77,7 @@ class AdminChatView extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (_) => ChangeNotifierProvider.value(
                             value: vm,
-                            child: const AdminChatDetailScreen(),
+                            child: const AdminChatDetailView(),
                           ),
                         ),
                       );

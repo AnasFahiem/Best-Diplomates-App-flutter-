@@ -873,7 +873,7 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: DropdownButtonFormField<String>(
-        value: value,
+        initialValue: value,
         decoration: InputDecoration(
           labelText: label,
           labelStyle: const TextStyle(color: AppColors.grey),

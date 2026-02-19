@@ -4,8 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 
-class SignupScreen extends StatelessWidget {
-  const SignupScreen({super.key});
+class SignupView extends StatelessWidget {
+  const SignupView({super.key});
 
   static const String _conferenceSignupUrl = 'https://future-diplomats.com/signup/';
 

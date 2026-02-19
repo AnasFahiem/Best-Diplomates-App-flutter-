@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../presentation/views/conferences_view.dart';
-import '../../presentation/views/opportunities_view.dart';
-import '../../../profile/presentation/screens/profile_screen.dart';
+import 'conferences_view.dart';
+import 'opportunities_view.dart';
+import '../../../../features/profile/presentation/views/profile_view.dart'; // Anticipating change
 import 'package:provider/provider.dart';
 import '../../../auth/presentation/viewmodels/auth_view_model.dart';
-import '../../../auth/presentation/screens/login_screen.dart';
+import '../../../auth/presentation/views/login_view.dart'; // Anticipating change
 import '../../../profile/presentation/viewmodels/profile_view_model.dart';
 import '../../../profile/presentation/views/support_center_view.dart';
 import '../../../profile/presentation/views/settings_view.dart';
 import '../../../chat/presentation/widgets/support_chat_fab.dart';
 import '../../../chat/presentation/viewmodels/chat_view_model.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class HomeView extends StatefulWidget {
+  const HomeView({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomeView> createState() => _HomeViewState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeViewState extends State<HomeView> {
   int _currentIndex = 0;
 
   @override
@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _pages = [
     const ConferencesView(),
     const OpportunitiesView(),
-    const ProfileScreen(),
+    const ProfileView(), // Updated
   ];
 
   final List<String> _titles = [
@@ -161,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (context.mounted) {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => const LoginScreen()),
+                        MaterialPageRoute(builder: (context) => const LoginView()), // Updated
                       );
                     }
                   },

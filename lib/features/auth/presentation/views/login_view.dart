@@ -4,20 +4,20 @@ import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../viewmodels/auth_view_model.dart';
-import '../../../home/presentation/screens/home_screen.dart';
-import '../../../admin/presentation/screens/admin_dashboard_screen.dart';
-import 'signup_screen.dart';
-import 'forgot_password_screen.dart';
-import 'change_password_screen.dart';
+import '../../../home/presentation/views/home_view.dart'; // Updated
+import '../../../admin/presentation/views/admin_dashboard_view.dart'; // Updated
+import 'signup_view.dart'; // Anticipating change
+import 'forgot_password_view.dart'; // Anticipating change
+import 'change_password_view.dart'; // Anticipating change
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class LoginView extends StatefulWidget {
+  const LoginView({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<LoginView> createState() => _LoginViewState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginViewState extends State<LoginView> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -155,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => const ForgotPasswordScreen(),
+                                            builder: (context) => const ForgotPasswordView(), // Updated
                                           ),
                                         );
                                       },
@@ -191,18 +191,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   // First login — force password change
                                                   Navigator.pushReplacement(
                                                     context,
-                                                    MaterialPageRoute(builder: (context) => const ChangePasswordScreen()),
+                                                    MaterialPageRoute(builder: (context) => const ChangePasswordView()), // Updated
                                                   );
                                                 } else if (authViewModel.isAdmin) {
                                                   // Admin user — redirect to admin dashboard
                                                   Navigator.pushReplacement(
                                                     context,
-                                                    MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
+                                                    MaterialPageRoute(builder: (context) => const AdminDashboardView()), // Updated
                                                   );
                                                 } else {
                                                   Navigator.pushReplacement(
                                                     context,
-                                                    MaterialPageRoute(builder: (context) => const HomeScreen()),
+                                                    MaterialPageRoute(builder: (context) => const HomeView()), // Updated
                                                   );
                                                 }
                                               } else if (context.mounted) {
@@ -241,7 +241,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       onTap: () {
                                           Navigator.push(
                                             context,
-                                            MaterialPageRoute(builder: (context) => const SignupScreen()),
+                                            MaterialPageRoute(builder: (context) => const SignupView()), // Updated
                                           );
                                       },
                                       child: Text(

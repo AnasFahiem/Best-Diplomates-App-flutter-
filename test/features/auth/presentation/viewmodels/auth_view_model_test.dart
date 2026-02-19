@@ -10,7 +10,7 @@ class MockAuthRepository implements AuthRepository {
   bool _isLoggedIn = false;
 
   @override
-  Future<Map<String, dynamic>?> signIn({required String username, required String password}) async {
+  Future<Map<String, dynamic>?> signIn({required String username, required String password, bool rememberMe = false}) async {
     if (shouldThrowError) throw Exception('Unexpected error');
     if (shouldReturnNull) return null;
     
