@@ -11,6 +11,7 @@ abstract class AuthRemoteDataSource {
   Future<String> resetPassword({required String username});
 
   Session? get currentSession;
+  Future<Map<String, dynamic>?> getProfileById(String id);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -86,4 +87,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Session? get currentSession => supabaseClient.auth.currentSession;
+
+  @override
+  Future<Map<String, dynamic>?> getProfileById(String id) async {
+    final response = await supabaseClient
+        .from('profiles')
+        .select()
+        .eq('id', id)
+        .maybeSingle();
+    return response;
+  }
 }

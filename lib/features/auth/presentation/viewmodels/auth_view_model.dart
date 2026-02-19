@@ -12,14 +12,29 @@ class AuthViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isAdmin => _authRepository.isAdmin;
+  
+  // Helper to check if logged in (for splash)
+  bool get isLoggedIn => _authRepository.isLoggedIn;
 
-  Future<bool> login(String username, String password) async {
+  Future<bool> checkAuthStatus() async {
+    _isLoading = true;
+    notifyListeners();
+    
+    final success = await _authRepository.restoreSession();
+    
+    _isLoading = false;
+    notifyListeners();
+    
+    return success;
+  }
+
+  Future<bool> login(String username, String password, {bool rememberMe = false}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final profile = await _authRepository.signIn(username: username, password: password);
+      final profile = await _authRepository.signIn(username: username, password: password, rememberMe: rememberMe);
       _isLoading = false;
       notifyListeners();
 

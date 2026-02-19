@@ -182,14 +182,104 @@ class AdminUserList extends StatelessWidget {
   }
 }
 
-class AdminChatPanel extends StatelessWidget {
+class AdminChatPanel extends StatefulWidget {
   final AdminViewModel vm;
 
   const AdminChatPanel({super.key, required this.vm});
 
   @override
+  State<AdminChatPanel> createState() => _AdminChatPanelState();
+}
+
+class _AdminChatPanelState extends State<AdminChatPanel> {
+  final ScrollController _scrollController = ScrollController();
+  final TextEditingController _replyController = TextEditingController();
+  
+  // State tracking variables
+  String? _prevUserId;
+  int _prevMessageCount = 0;
+  bool _needsInitialScroll = true; // Start true for first mount
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize state
+    _prevUserId = widget.vm.selectedUserId;
+    _prevMessageCount = widget.vm.chatMessages.length;
+    _needsInitialScroll = true;
+    
+    // Initial scroll on mount
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!widget.vm.isLoadingChat) {
+        _scrollToBottom(animate: false);
+        _needsInitialScroll = false;
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(AdminChatPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    final currentUserId = widget.vm.selectedUserId;
+    final currentCount = widget.vm.chatMessages.length;
+    final isLoading = widget.vm.isLoadingChat;
+
+    // Check if user changed
+    if (currentUserId != _prevUserId) {
+      _prevUserId = currentUserId;
+      _needsInitialScroll = true;
+    }
+
+    // Handle Initial Scroll (User switched or First Load)
+    if (_needsInitialScroll && !isLoading) {
+       WidgetsBinding.instance.addPostFrameCallback((_) {
+         _scrollToBottom(animate: false);
+         // Only reset flag if we actually scrolled (clients exist) or if empty
+         // But _scrollToBottom checks clients. 
+         // We should reset flag anyway to avoid stuck loop, assume it worked or tried.
+       });
+       _needsInitialScroll = false;
+       _prevMessageCount = currentCount; // Sync count so we don't trigger "new message" logic immediately
+       return; 
+    }
+
+    // Handle New Message (Same user, count increased)
+    if (!isLoading && currentCount > _prevMessageCount && currentUserId == _prevUserId) {
+       WidgetsBinding.instance.addPostFrameCallback((_) {
+         _scrollToBottom(animate: true);
+       });
+    }
+    
+    // Update count
+    _prevMessageCount = currentCount;
+  }
+
+  void _scrollToBottom({bool animate = true}) {
+    if (_scrollController.hasClients && widget.vm.chatMessages.isNotEmpty) {
+      final position = _scrollController.position.maxScrollExtent;
+      if (animate) {
+        _scrollController.animateTo(
+          position,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      } else {
+        _scrollController.jumpTo(position);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _replyController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (vm.selectedUserId == null) {
+    if (widget.vm.selectedUserId == null) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -229,7 +319,7 @@ class AdminChatPanel extends StatelessWidget {
                 radius: 18,
                 backgroundColor: AppColors.primaryBlue,
                 child: Text(
-                  vm.selectedUserName?.trim().split(' ').take(2)
+                  widget.vm.selectedUserName?.trim().split(' ').take(2)
                       .map((e) => e.isNotEmpty ? e[0] : '')
                       .join()
                       .toUpperCase() ?? '?',
@@ -242,7 +332,7 @@ class AdminChatPanel extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      vm.selectedUserName ?? 'User',
+                      widget.vm.selectedUserName ?? 'User',
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
@@ -261,9 +351,9 @@ class AdminChatPanel extends StatelessWidget {
         ),
         // ── Messages ──
         Expanded(
-          child: vm.isLoadingChat
+          child: widget.vm.isLoadingChat
               ? const Center(child: CircularProgressIndicator(color: AppColors.primaryBlue))
-              : vm.chatMessages.isEmpty
+              : widget.vm.chatMessages.isEmpty
                   ? Center(
                       child: Text(
                         'No messages in this conversation',
@@ -271,10 +361,11 @@ class AdminChatPanel extends StatelessWidget {
                       ),
                     )
                   : ListView.builder(
+                      controller: _scrollController,
                       padding: const EdgeInsets.all(16),
-                      itemCount: vm.chatMessages.length,
+                      itemCount: widget.vm.chatMessages.length,
                       itemBuilder: (context, index) {
-                        final msg = vm.chatMessages[index];
+                        final msg = widget.vm.chatMessages[index];
                         final isAdmin = msg.senderRole == 'admin';
                         return _buildMessageBubble(msg, isAdmin);
                       },
@@ -327,7 +418,6 @@ class AdminChatPanel extends StatelessWidget {
   }
 
   Widget _buildReplyInput(BuildContext context) {
-    final controller = TextEditingController();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -338,7 +428,7 @@ class AdminChatPanel extends StatelessWidget {
         children: [
           Expanded(
             child: TextField(
-              controller: controller,
+              controller: _replyController,
               decoration: InputDecoration(
                 hintText: 'Type your reply...',
                 hintStyle: GoogleFonts.poppins(color: AppColors.grey, fontSize: 14),
@@ -364,8 +454,8 @@ class AdminChatPanel extends StatelessWidget {
               textInputAction: TextInputAction.send,
               onSubmitted: (text) {
                 if (text.trim().isNotEmpty) {
-                  vm.sendReply(text);
-                  controller.clear();
+                  widget.vm.sendReply(text);
+                  _replyController.clear();
                 }
               },
             ),
@@ -378,9 +468,9 @@ class AdminChatPanel extends StatelessWidget {
             child: InkWell(
               borderRadius: BorderRadius.circular(12),
               onTap: () {
-                if (controller.text.trim().isNotEmpty) {
-                  vm.sendReply(controller.text);
-                  controller.clear();
+                if (_replyController.text.trim().isNotEmpty) {
+                  widget.vm.sendReply(_replyController.text);
+                  _replyController.clear();
                 }
               },
               child: const Padding(

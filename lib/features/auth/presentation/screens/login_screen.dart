@@ -22,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  bool _rememberMe = false;
 
   @override
   void dispose() {
@@ -126,25 +127,47 @@ class _LoginScreenState extends State<LoginScreen> {
                               const SizedBox(height: 10),
                               FadeInUp(
                                 delay:const Duration(milliseconds: 500),
-                                child: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: TextButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => const ForgotPasswordScreen(),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Checkbox(
+                                          value: _rememberMe,
+                                          activeColor: AppColors.primaryBlue,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _rememberMe = value ?? false;
+                                            });
+                                          },
                                         ),
-                                      );
-                                    },
-                                    child: Text(
-                                      "Forgot Password?",
-                                      style: GoogleFonts.inter(
-                                        color: AppColors.primaryBlue,
-                                        fontWeight: FontWeight.w600,
+                                        Text(
+                                          "Remember Me",
+                                          style: GoogleFonts.inter(
+                                            color: AppColors.textPrimary,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => const ForgotPasswordScreen(),
+                                          ),
+                                        );
+                                      },
+                                      child: Text(
+                                        "Forgot Password?",
+                                        style: GoogleFonts.inter(
+                                          color: AppColors.primaryBlue,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                     ),
-                                  ),
+                                  ],
                                 ),
                               ),
                               const SizedBox(height: 30),
@@ -160,7 +183,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                             if (_formKey.currentState!.validate()) {
                                               bool success = await authViewModel.login(
                                                   _usernameController.text.trim(),
-                                                  _passwordController.text);
+                                                  _passwordController.text,
+                                                  rememberMe: _rememberMe,
+                                              );
                                               if (success && context.mounted) {
                                                 if (authViewModel.mustChangePassword) {
                                                   // First login — force password change

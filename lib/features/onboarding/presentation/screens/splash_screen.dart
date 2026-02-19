@@ -4,6 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
+import '../../../../features/home/presentation/screens/home_screen.dart';
+import '../../../../features/admin/presentation/screens/admin_dashboard_screen.dart';
+import 'package:provider/provider.dart';
+import '../../../auth/presentation/viewmodels/auth_view_model.dart';
 import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -25,12 +29,26 @@ class _SplashScreenState extends State<SplashScreen> {
     
     if (!mounted) return;
 
-    final prefs = await SharedPreferences.getInstance();
-    bool seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
+    final authVM = Provider.of<AuthViewModel>(context, listen: false);
+    final isLoggedIn = await authVM.checkAuthStatus(); // Restore session
 
     if (!mounted) return;
 
-    Widget nextScreen = seenOnboarding ? const LoginScreen() : const OnboardingScreen();
+    Widget nextScreen;
+    
+    if (isLoggedIn) {
+      if (authVM.isAdmin) {
+        nextScreen = const AdminDashboardScreen();
+      } else {
+        nextScreen = const HomeScreen();
+      }
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      bool seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
+      nextScreen = seenOnboarding ? const LoginScreen() : const OnboardingScreen();
+    }
+
+    if (!mounted) return;
 
     Navigator.pushReplacement(
       context,
