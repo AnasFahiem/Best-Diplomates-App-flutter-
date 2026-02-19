@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../viewmodels/auth_view_model.dart';
 import '../../../home/presentation/screens/home_screen.dart';
+import '../../../admin/presentation/screens/admin_dashboard_screen.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
 import 'change_password_screen.dart';
@@ -81,9 +82,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: TextFormField(
                                   controller: _usernameController,
                                   decoration: const InputDecoration(
-                                    labelText: "Username",
-                                    prefixIcon: Icon(Icons.person_outline),
+                                    labelText: "Username / Email",
+                                    prefixIcon: Icon(Icons.email_outlined),
                                   ),
+                                  keyboardType: TextInputType.emailAddress,
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
                                       return 'Please enter your username';
@@ -165,6 +167,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   Navigator.pushReplacement(
                                                     context,
                                                     MaterialPageRoute(builder: (context) => const ChangePasswordScreen()),
+                                                  );
+                                                } else if (authViewModel.isAdmin) {
+                                                  // Admin user — redirect to admin dashboard
+                                                  Navigator.pushReplacement(
+                                                    context,
+                                                    MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
                                                   );
                                                 } else {
                                                   Navigator.pushReplacement(

@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +15,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../domain/models/user_profile.dart';
 import '../viewmodels/profile_view_model.dart';
 import '../../../auth/presentation/viewmodels/auth_view_model.dart';
+
+enum _ExitAction { discard, save, cancel }
 
 class BasicInfoView extends StatefulWidget {
   const BasicInfoView({super.key});
@@ -69,7 +73,11 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
   bool _isUploading = false;
   
   // Save Guard State
+  // Save Guard State
   bool _hasChanges = false;
+  bool _hasPopulatedControllers = false;
+  // Start as true to prevent initial builds/populations from triggering changes
+  bool _isInitializing = true; 
   final ScrollController _scrollController = ScrollController();
   late AnimationController _shakeController;
   // ignore: unused_field
@@ -78,6 +86,9 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
   // Data Lists
   final List<String> _genders = ['Male', 'Female'];
   final List<String> _maritalStatuses = ['Single', 'Married', 'Divorced', 'Widowed'];
+  
+  // Timers
+  Timer? _initializationTimer;
 
   @override
   void initState() {
@@ -101,15 +112,29 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
       final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
       final userProfile = authViewModel.currentUserProfile;
       if (userProfile != null) {
+        // If profile exists, fetch full details just in case
         Provider.of<ProfileViewModel>(context, listen: false).fetchProfile(userProfile['id']);
+      } else {
+        // If no profile, we are done initializing (e.g. new form)
+        setState(() {
+          _isInitializing = false;
+        });
       }
     });
   }
 
   void _addChangeListeners() {
     void markChanged() {
+      if (_isInitializing) return;
       if (!_hasChanges) {
-        setState(() => _hasChanges = true);
+        // Safe setState execution
+        if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+           WidgetsBinding.instance.addPostFrameCallback((_) {
+             if (mounted && !_hasChanges) setState(() => _hasChanges = true);
+           });
+        } else {
+           setState(() => _hasChanges = true);
+        }
       }
     }
 
@@ -117,14 +142,16 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
     _lastNameController.addListener(markChanged);
     _addressController.addListener(markChanged);
     _nationalityController.addListener(markChanged);
-    // Phone controllers mostly handled by IntlPhoneField callbacks, but explicit listeners help too
-    _phoneController.addListener(markChanged);
     _emergencyNameController.addListener(markChanged);
+    // Explicit listeners for phone controllers too, just in case
+    // The IntlPhoneField might update the controller text but not trigger onChanged in some cases
+    _phoneController.addListener(markChanged);
     _emergencyPhoneController.addListener(markChanged);
   }
 
   @override
   void dispose() {
+    _initializationTimer?.cancel();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
@@ -141,9 +168,6 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
   Map<String, String>? _parsePhoneNumber(String? phoneNumber) {
     if (phoneNumber == null || phoneNumber.isEmpty) return null;
     
-    // Create a local copy and sort by dial code length (descending) 
-    // to match longer codes first (e.g. +971 before +9)
-    // Use the aliased intl_phone.Country
     final sortedCountries = List<intl_phone.Country>.from(intl_phone.countries)
       ..sort((a, b) => b.dialCode.length.compareTo(a.dialCode.length));
 
@@ -160,6 +184,12 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
   }
 
   void _populateControllers(UserProfile profile) {
+    // Ensure we are initializing
+    _isInitializing = true;
+    _initializationTimer?.cancel(); 
+    
+    debugPrint('BasicInfoView: Populating controllers from profile: ${profile.firstName}');
+    
     _firstNameController.text = profile.firstName ?? '';
     _lastNameController.text = profile.lastName ?? '';
     _emailController.text = profile.email ?? '';
@@ -170,6 +200,7 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
     if (profile.phone != null && profile.phone!.isNotEmpty) {
       final parsed = _parsePhoneNumber(profile.phone);
       if (parsed != null) {
+        debugPrint('BasicInfoView: Parsed Phone: ${parsed['code']} ${parsed['number']}');
         _phoneIsoCode = parsed['code']!;
         _phoneController.text = parsed['number']!;
       } else {
@@ -181,6 +212,7 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
     if (profile.emergencyContactNumber != null && profile.emergencyContactNumber!.isNotEmpty) {
        final parsed = _parsePhoneNumber(profile.emergencyContactNumber);
        if (parsed != null) {
+         debugPrint('BasicInfoView: Parsed Emergency Phone: ${parsed['code']} ${parsed['number']}');
          _emergencyPhoneIsoCode = parsed['code']!;
          _emergencyPhoneController.text = parsed['number']!;
        } else {
@@ -201,8 +233,28 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
         _selectedMaritalStatus = profile.maritalStatus;
     }
     
-    // Refresh UI to show correct flags
-    if (mounted) setState(() {});
+    // Finish initialization
+    if (mounted) {
+       // Refresh UI to show values
+       setState(() {});
+       
+       // Allow changes after valid frame
+       WidgetsBinding.instance.addPostFrameCallback((_) {
+         if (mounted) {
+           _isInitializing = false;
+         }
+       });
+       
+       // Failsafe timer in case frame callback takes too long or gets dropped
+       _initializationTimer = Timer(const Duration(milliseconds: 500), () {
+          if (mounted && _isInitializing) {
+             debugPrint('BasicInfoView: Failsafe timer disabling initialization mode');
+             setState(() => _isInitializing = false);
+          }
+       });
+    } else {
+      _isInitializing = false;
+    }
   }
 
   Future<void> _pickImage() async {
@@ -213,6 +265,7 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
       setState(() {
         _imageFile = pickedFile;
         _isUploading = true;
+        _hasChanges = true;
       });
       
       // Auto upload if user is logged in
@@ -301,7 +354,7 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
     }
   }
 
-  Future<void> _saveProfile() async {
+  Future<bool> _saveProfile() async {
     if (_formKey.currentState!.validate()) {
        final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
        final userProfile = authViewModel.currentUserProfile;
@@ -334,16 +387,21 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
              ScaffoldMessenger.of(context).showSnackBar(
                const SnackBar(content: Text('Profile updated successfully'), backgroundColor: Colors.green),
              );
+             return true;
            } else {
              final error = Provider.of<ProfileViewModel>(context, listen: false).errorMessage;
              ScaffoldMessenger.of(context).showSnackBar(
                SnackBar(content: Text(error ?? 'Failed to update profile'), backgroundColor: Colors.red),
              );
+             return false;
            }
          }
        }
     }
+    return false;
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -352,29 +410,68 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
 
     return PopScope(
       canPop: canPop,
-      onPopInvokedWithResult: (didPop, result) {
+      onPopInvokedWithResult: (didPop, result) async {
+        debugPrint('PopScope: onPopInvokedWithResult called. didPop: $didPop, canPop: $canPop, _hasChanges: $_hasChanges');
         if (didPop) return;
 
         if (_isUploading) {
            ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Please wait for the upload to complete.'), backgroundColor: Colors.orange),
           );
-        } else if (_hasChanges) {
-           // Scroll to bottom
-           if (_scrollController.hasClients) {
-             _scrollController.animateTo(
-               _scrollController.position.maxScrollExtent,
-               duration: const Duration(milliseconds: 300),
-               curve: Curves.easeOut,
-             );
+          return;
+        } 
+        
+        if (_hasChanges) {
+           debugPrint('PopScope: Showing Unsaved Changes Dialog');
+           // Show confirmation dialog
+           final action = await showDialog<_ExitAction>(
+             context: context,
+             builder: (dialogContext) => AlertDialog(
+               title: Text('Unsaved Changes', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+               content: Text('You have unsaved changes. Are you sure you want to discard them?', style: GoogleFonts.inter()),
+               actions: [
+                 TextButton(
+                   onPressed: () {
+                     Navigator.of(dialogContext).pop(_ExitAction.discard);
+                   },
+                   child: Text('Go without saving', style: GoogleFonts.inter(color: Colors.red)),
+                 ),
+                 ElevatedButton(
+                   onPressed: () {
+                     Navigator.of(dialogContext).pop(_ExitAction.save);
+                   },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryBlue,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                   child: Text('Save Changes', style: GoogleFonts.inter(color: Colors.white)),
+                 ),
+               ],
+             ),
+           );
+
+           if (!mounted) return;
+
+           switch (action) {
+             case _ExitAction.discard:
+               setState(() => _hasChanges = false);
+               // Allow the pop to happen now
+               Navigator.of(context).pop();
+               break;
+             case _ExitAction.save:
+               final success = await _saveProfile();
+               if (success && mounted) {
+                 Navigator.of(context).pop();
+               }
+               break;
+             case _ExitAction.cancel:
+             case null:
+               // Do nothing, stay on screen
+               break;
            }
-           
-           // Shake button
-           _shakeController.forward(from: 0.0);
-           
-           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please save your changes first!'), duration: Duration(seconds: 2), backgroundColor: Colors.orange),
-          );
+        } else {
+          // No changes, just pop
+          Navigator.of(context).pop();
         }
       },
       child: Scaffold(
@@ -401,9 +498,16 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
              return const Center(child: CircularProgressIndicator(color: AppColors.primaryBlue));
           }
           
-          // Populate controllers once when profile loads (and they are empty)
-          if (viewModel.userProfile != null && _firstNameController.text.isEmpty) {
-             _populateControllers(viewModel.userProfile!);
+
+          // Populate controllers once when profile loads
+          if (viewModel.userProfile != null && !_hasPopulatedControllers) {
+             debugPrint('BasicInfoView: Profile loaded, scheduling _populateControllers');
+             WidgetsBinding.instance.addPostFrameCallback((_) {
+               if (mounted && !_hasPopulatedControllers) {
+                 _hasPopulatedControllers = true;
+                 _populateControllers(viewModel.userProfile!);
+               }
+             });
           }
           
           final profile = viewModel.userProfile;
@@ -425,8 +529,12 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
           return SingleChildScrollView(
             controller: _scrollController,
             padding: const EdgeInsets.all(16.0),
-            child: Form(
+            child: Form( // Added onWillPop logging in previous step, but let's reinforce PopScope
               key: _formKey,
+              onWillPop: () async {
+                debugPrint('onWillPop called. _hasChanges: $_hasChanges');
+                return true;
+              },
               child: Column(
                 children: [
                   Center(
@@ -490,7 +598,7 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
                   const SizedBox(height: 30),
                   _buildTextField("First Name", _firstNameController),
                   _buildTextField("Last Name", _lastNameController),
-                  _buildTextField("Email Address", _emailController, readOnly: true),
+                  _buildTextField("Email Address", _emailController, readOnly: true, keyboardType: TextInputType.emailAddress),
                   _buildTextField("Address", _addressController),
                   
                   // Gender Dropdown
@@ -574,6 +682,9 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
                   Padding(
                     padding: const EdgeInsets.only(bottom: 15),
                     child: IntlPhoneField(
+                      // Force rebuild when phone code changes to update initialCountryCode correctly
+                      key: ValueKey('phone_$_phoneIsoCode'),
+                      controller: _phoneController,
                       decoration: InputDecoration(
                         labelText: 'Phone Number',
                         labelStyle: const TextStyle(color: AppColors.grey),
@@ -587,22 +698,41 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
                           borderRadius: BorderRadius.circular(10),
                           borderSide: const BorderSide(color: AppColors.gold),
                         ),
+                        counterText: "", // Hide character counter
                       ),
-                      initialCountryCode: _phoneIsoCode, 
-                      initialValue: _phoneController.text, // This sets existing number without code
+                      initialCountryCode: _phoneIsoCode,
+                      // We can omit initialValue if we use controller, but keeping it consistent with logic
+                      initialValue: _phoneController.text,
                       inputFormatters: [
                         LeadingZeroFormatter(),
                         FilteringTextInputFormatter.digitsOnly,
                       ],
                       onChanged: (phone) {
+                        if (_isInitializing) return;
                         _completePhoneNumber = phone.completeNumber;
-                        _hasChanges = true;
-                        setState(() {});
+                        if (!_hasChanges) {
+                           // Safe setState execution
+                           if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted && !_hasChanges) setState(() => _hasChanges = true);
+                              });
+                           } else {
+                              setState(() => _hasChanges = true);
+                           }
+                        }
                       },
                       onCountryChanged: (country) {
                          // Country change triggers update
-                         _hasChanges = true;
-                         setState(() {});
+                         if (_isInitializing) return;
+                         if (!_hasChanges) {
+                           if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted && !_hasChanges) setState(() => _hasChanges = true);
+                              });
+                           } else {
+                              setState(() => _hasChanges = true);
+                           }
+                         }
                       },
                     ),
                   ),
@@ -613,6 +743,8 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
                   Padding(
                      padding: const EdgeInsets.only(bottom: 15),
                      child: IntlPhoneField(
+                       key: ValueKey('emergency_phone_$_emergencyPhoneIsoCode'),
+                       controller: _emergencyPhoneController,
                        decoration: InputDecoration(
                          labelText: 'Emergency Contact Number',
                          labelStyle: const TextStyle(color: AppColors.grey),
@@ -626,6 +758,7 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
                            borderRadius: BorderRadius.circular(10),
                            borderSide: const BorderSide(color: AppColors.gold),
                          ),
+                         counterText: "",
                        ),
                        initialCountryCode: _emergencyPhoneIsoCode, 
                        initialValue: _emergencyPhoneController.text,
@@ -634,13 +767,29 @@ class _BasicInfoViewState extends State<BasicInfoView> with SingleTickerProvider
                         FilteringTextInputFormatter.digitsOnly,
                       ],
                        onChanged: (phone) {
+                         if (_isInitializing) return;
                          _completeEmergencyPhoneNumber = phone.completeNumber;
-                         _hasChanges = true;
-                         setState(() {});
+                         if (!_hasChanges) {
+                           if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted && !_hasChanges) setState(() => _hasChanges = true);
+                              });
+                           } else {
+                              setState(() => _hasChanges = true);
+                           }
+                         }
                        },
                        onCountryChanged: (country) {
-                          _hasChanges = true;
-                          setState(() {});
+                          if (_isInitializing) return;
+                          if (!_hasChanges) {
+                           if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted && !_hasChanges) setState(() => _hasChanges = true);
+                              });
+                           } else {
+                              setState(() => _hasChanges = true);
+                           }
+                         }
                        },
                      ),
                    ),

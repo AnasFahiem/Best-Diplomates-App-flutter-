@@ -21,26 +21,44 @@ class MockAuthRepository implements AuthRepository {
       'login_password': password,
       'first_name': 'Test',
       'last_name': 'User',
+      'email': 'test@example.com',
+      'role': 'user', // Default role
     };
+    if (username == 'admin') {
+      _mockProfile!['role'] = 'admin';
+      _isAdmin = true;
+    } else {
+      _isAdmin = false;
+    }
     return _mockProfile;
   }
 
   @override
+  Future<void> changePassword({required String userId, required String newPassword}) async {}
+
+  @override
   Future<void> signOut() async {
     _isLoggedIn = false;
+    _isAdmin = false;
     _mockProfile = null;
   }
 
   @override
   Future<void> deleteAccount() async {
     _isLoggedIn = false;
+    _isAdmin = false;
     _mockProfile = null;
   }
 
   @override
-  Future<void> resetPasswordForEmail({required String email}) async {
+  Future<String> resetPassword({required String username}) async {
     if (shouldThrowError) throw Exception('Failed to send reset email');
+    return 'new-password-123';
   }
+
+  bool _isAdmin = false;
+  @override
+  bool get isAdmin => _isAdmin;
 
   @override
   bool get isLoggedIn => _isLoggedIn;

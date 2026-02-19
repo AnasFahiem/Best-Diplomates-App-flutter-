@@ -11,6 +11,7 @@ class AuthViewModel extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  bool get isAdmin => _authRepository.isAdmin;
 
   Future<bool> login(String username, String password) async {
     _isLoading = true;

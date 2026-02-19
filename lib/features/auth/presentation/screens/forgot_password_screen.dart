@@ -86,10 +86,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             delay: const Duration(milliseconds: 300),
                             child: TextFormField(
                               controller: _usernameController,
-                              decoration: const InputDecoration(
-                                labelText: "Username",
-                                prefixIcon: Icon(Icons.person_outline),
-                              ),
+                                decoration: const InputDecoration(
+                                  labelText: "Email",
+                                  prefixIcon: Icon(Icons.email_outlined),
+                                ),
+                                keyboardType: TextInputType.emailAddress,
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
                                   return 'Please enter your username';

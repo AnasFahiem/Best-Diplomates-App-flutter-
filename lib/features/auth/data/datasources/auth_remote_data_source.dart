@@ -1,12 +1,15 @@
 import 'dart:math';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:flutter/foundation.dart';
+
 abstract class AuthRemoteDataSource {
   Future<Map<String, dynamic>?> loginWithCredentials({required String username, required String password});
   Future<void> changePassword({required String userId, required String newPassword});
   Future<void> signOut();
   Future<void> deleteAccount();
   Future<String> resetPassword({required String username});
+
   Session? get currentSession;
 }
 
@@ -78,6 +81,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     return tempPassword;
   }
+
+
 
   @override
   Session? get currentSession => supabaseClient.auth.currentSession;

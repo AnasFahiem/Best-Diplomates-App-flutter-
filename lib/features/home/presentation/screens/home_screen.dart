@@ -10,6 +10,8 @@ import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../profile/presentation/viewmodels/profile_view_model.dart';
 import '../../../profile/presentation/views/support_center_view.dart';
 import '../../../profile/presentation/views/settings_view.dart';
+import '../../../chat/presentation/widgets/support_chat_fab.dart';
+import '../../../chat/presentation/viewmodels/chat_view_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,6 +32,8 @@ class _HomeScreenState extends State<HomeScreen> {
       if (userProfile != null) {
         // Fetch profile immediately to ensure we have the latest first/last name
         Provider.of<ProfileViewModel>(context, listen: false).fetchProfile(userProfile['id']);
+        // Initialize Support Chat for this user
+        Provider.of<ChatViewModel>(context, listen: false).initialize(userProfile['id'].toString());
       }
     });
   }
@@ -168,6 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
       body: _pages[_currentIndex],
+      floatingActionButton: const SupportChatFab(),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {

@@ -151,6 +151,37 @@ class NotificationService {
     );
   }
 
+  /// Show a notification for a new support chat message or announcement.
+  Future<void> showChatMessage({
+    required String title,
+    required String body,
+  }) async {
+    if (!_initialized) return;
+
+    if (!await _isEnabled('push_notifications')) return;
+
+    const androidDetails = AndroidNotificationDetails(
+      'support_chat',
+      'Support Chat',
+      channelDescription: 'Messages from support and global announcements',
+      importance: Importance.high,
+      priority: Priority.high,
+      showWhen: true,
+    );
+
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentSound: true),
+    );
+
+    await _plugin.show(
+      id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
+      title: title,
+      body: body,
+      notificationDetails: details,
+    );
+  }
+
   /// Cancel a specific notification by ID.
   Future<void> cancelNotification(int id) async {
     if (!_initialized) return;

@@ -4,6 +4,8 @@ abstract class AuthRepository {
   Future<void> signOut();
   Future<void> deleteAccount();
   Future<String> resetPassword({required String username});
+
   bool get isLoggedIn;
+  bool get isAdmin;
   Map<String, dynamic>? get currentUserProfile;
 }

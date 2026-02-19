@@ -17,6 +17,9 @@ import 'features/home/data/repositories/application_repository_impl.dart';
 import 'features/home/data/datasources/application_remote_data_source.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/services/notification_service.dart';
+import 'features/chat/presentation/viewmodels/chat_view_model.dart';
+import 'features/chat/data/repositories/chat_repository_impl.dart';
+import 'features/chat/data/datasources/chat_remote_data_source.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,6 +63,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ApplicationViewModel(
           repository: ApplicationRepositoryImpl(
             remoteDataSource: ApplicationRemoteDataSourceImpl(
+              supabaseClient: Supabase.instance.client,
+            ),
+          ),
+        )),
+        ChangeNotifierProvider(create: (_) => ChatViewModel(
+          repository: ChatRepositoryImpl(
+            remoteDataSource: ChatRemoteDataSourceImpl(
               supabaseClient: Supabase.instance.client,
             ),
           ),
