@@ -130,25 +130,30 @@ class _LoginViewState extends State<LoginView> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Row(
-                                      children: [
-                                        Checkbox(
-                                          value: _rememberMe,
-                                          activeColor: AppColors.primaryBlue,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              _rememberMe = value ?? false;
-                                            });
-                                          },
-                                        ),
-                                        Text(
-                                          "Remember Me",
-                                          style: GoogleFonts.inter(
-                                            color: AppColors.textPrimary,
-                                            fontSize: 14,
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          Checkbox(
+                                            value: _rememberMe,
+                                            activeColor: AppColors.primaryBlue,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                _rememberMe = value ?? false;
+                                              });
+                                            },
                                           ),
-                                        ),
-                                      ],
+                                          Expanded(
+                                            child: Text(
+                                              "Remember Me",
+                                              style: GoogleFonts.inter(
+                                                color: AppColors.textPrimary,
+                                                fontSize: 14,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                     TextButton(
                                       onPressed: () {
@@ -230,8 +235,9 @@ class _LoginViewState extends State<LoginView> {
                               const SizedBox(height: 20),
                               FadeInUp(
                                 delay: const Duration(milliseconds: 700),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                child: Wrap(
+                                  alignment: WrapAlignment.center,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
                                   children: [
                                     Text(
                                       "Don't have an account? ",

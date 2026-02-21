@@ -84,9 +84,12 @@ class _ModeratorDetailsViewState extends State<ModeratorDetailsView> {
                           children: [
                             const Icon(Icons.info_outline, color: AppColors.gold),
                             const SizedBox(width: 10),
-                            Text(
-                              "About this Position",
-                              style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
+                            Expanded(
+                              child: Text(
+                                "About this Position",
+                                style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                         ),

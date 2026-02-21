@@ -147,8 +147,9 @@ class SignupView extends StatelessWidget {
               // Already have an account? Login
               FadeInUp(
                 delay: const Duration(milliseconds: 700),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
                       "Already have an account? ",

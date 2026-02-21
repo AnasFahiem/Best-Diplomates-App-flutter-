@@ -360,12 +360,14 @@ class _RepresentativeDetailsFormViewState extends State<RepresentativeDetailsFor
       validator: isRequired ? (value) => value == null || value.isEmpty ? '$label is required' : null : null,
       decoration: _inputDecoration(null).copyWith(
         prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: AppColors.grey) : null,
-        label: Row(
-            mainAxisSize: MainAxisSize.min,
+        label: RichText(
+          text: TextSpan(
+            text: label,
+            style: const TextStyle(color: AppColors.grey),
             children: [
-              Text(label, style: const TextStyle(color: AppColors.grey)),
-              if (isRequired) const Text(" *", style: TextStyle(color: Colors.red))
-            ]
+              if (isRequired) const TextSpan(text: " *", style: TextStyle(color: Colors.red)),
+            ],
+          ),
         ),
       ),
     );

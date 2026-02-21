@@ -85,9 +85,12 @@ class _CountryRepresentativeDetailsViewState extends State<CountryRepresentative
                             children: [
                               const Icon(Icons.info_outline, color: AppColors.gold),
                               const SizedBox(width: 10),
-                              Text(
-                                "About this Position",
-                                style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
+                              Expanded(
+                                child: Text(
+                                  "About this Position",
+                                  style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ],
                           ),
@@ -258,18 +261,23 @@ class _CountryRepresentativeDetailsViewState extends State<CountryRepresentative
                 children: [
                   Row(
                     children: [
-                      Text(
-                        title, 
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold, 
-                          fontSize: 16, 
-                          color: isLocked ? AppColors.grey : AppColors.primaryBlue
-                        )
+                      RichText(
+                        text: TextSpan(
+                          text: title,
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold, 
+                            fontSize: 16, 
+                            color: isLocked ? AppColors.grey : AppColors.primaryBlue
+                          ),
+                          children: [
+                            if (isRequired && !isLocked)
+                              TextSpan(
+                                text: " *", 
+                                style: GoogleFonts.poppins(color: Colors.red, fontWeight: FontWeight.bold)
+                              ),
+                          ],
+                        ),
                       ),
-                      if (isRequired && !isLocked) ...[
-                        const SizedBox(width: 5),
-                        Text("*", style: GoogleFonts.poppins(color: Colors.red, fontWeight: FontWeight.bold)),
-                      ]
                     ],
                   ),
                   const SizedBox(height: 5),

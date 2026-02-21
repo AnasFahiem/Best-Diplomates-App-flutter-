@@ -192,12 +192,15 @@ class _AdminDashboardViewState extends State<AdminDashboardView> {
                     children: [
                       const Icon(Icons.logout, color: AppColors.error, size: 20),
                       const SizedBox(width: 12),
-                      Text(
-                        'Logout',
-                        style: GoogleFonts.poppins(
-                          color: AppColors.error,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                      Expanded(
+                        child: Text(
+                          'Logout',
+                          style: GoogleFonts.poppins(
+                            color: AppColors.error,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -237,12 +240,15 @@ class _AdminDashboardViewState extends State<AdminDashboardView> {
                   size: 20,
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  label,
-                  style: GoogleFonts.poppins(
-                    color: isActive ? Colors.white : AppColors.grey,
-                    fontSize: 14,
-                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                Expanded(
+                  child: Text(
+                    label,
+                    style: GoogleFonts.poppins(
+                      color: isActive ? Colors.white : AppColors.grey,
+                      fontSize: 14,
+                      fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],

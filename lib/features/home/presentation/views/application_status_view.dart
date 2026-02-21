@@ -71,9 +71,12 @@ class ApplicationStatusView extends StatelessWidget {
                       children: [
                         const Icon(Icons.comment, color: AppColors.gold),
                         const SizedBox(width: 10),
-                        Text(
-                          "Team Comments",
-                          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
+                        Expanded(
+                          child: Text(
+                            "Team Comments",
+                            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryBlue),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                     ),

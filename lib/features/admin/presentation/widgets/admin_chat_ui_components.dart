@@ -31,26 +31,30 @@ class AdminUserList extends StatelessWidget {
               color: AppColors.white,
               border: Border(bottom: BorderSide(color: AppColors.lightGrey, width: 1)),
             ),
-            child: Row(
-              children: [
-                const Icon(Icons.people, color: AppColors.primaryBlue, size: 22),
-                const SizedBox(width: 10),
-                Text(
-                  'Conversations',
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Row(
+                children: [
+                  const Icon(Icons.people, color: AppColors.primaryBlue, size: 22),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Conversations',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-                const Spacer(),
-                // Refresh button
-                IconButton(
-                  onPressed: () => vm.fetchThreads(),
-                  icon: const Icon(Icons.refresh, color: AppColors.grey, size: 20),
-                  tooltip: 'Refresh',
-                ),
-              ],
+                  const SizedBox(width: 10),
+                  // Refresh button
+                  IconButton(
+                    onPressed: () => vm.fetchThreads(),
+                    icon: const Icon(Icons.refresh, color: AppColors.grey, size: 20),
+                    tooltip: 'Refresh',
+                  ),
+                ],
+              ),
             ),
           ),
           // User threads list
